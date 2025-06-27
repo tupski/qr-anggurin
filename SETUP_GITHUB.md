@@ -19,8 +19,7 @@ Setelah repository GitHub dibuat, jalankan command berikut di terminal:
 # Tambahkan remote origin
 git remote add origin https://github.com/tupski/qr-anggurin.git
 
-# Push ke GitHub
-git branch -M main
+# Branch sudah diubah ke main, langsung push
 git push -u origin main
 ```
 
