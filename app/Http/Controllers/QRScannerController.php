@@ -17,7 +17,7 @@ class QRScannerController extends Controller
         try {
             $request->validate([
                 'method' => 'required|in:upload,url,camera',
-                'file' => 'required_if:method,upload|image|max:10240',
+                'file' => 'required_if:method,upload|file|max:10240|mimes:jpeg,jpg,png,gif,bmp,svg,webp',
                 'url' => 'required_if:method,url|url',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -34,9 +34,39 @@ class QRScannerController extends Controller
                 $imagePath = $request->file('file')->store('temp', 'public');
                 $fullPath = storage_path('app/public/' . $imagePath);
             } elseif ($request->method === 'url') {
-                // Download image from URL
-                $imageContent = file_get_contents($request->url);
-                $imagePath = 'temp/' . uniqid() . '.jpg';
+                // Download image from URL with better error handling
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 30,
+                        'user_agent' => 'QR-Anggurin-Scanner/1.0',
+                        'follow_location' => true,
+                        'max_redirects' => 5
+                    ]
+                ]);
+
+                $imageContent = @file_get_contents($request->url, false, $context);
+                if ($imageContent === false) {
+                    throw new \Exception('Failed to download image from URL');
+                }
+
+                // Detect file extension from URL or content
+                $urlPath = parse_url($request->url, PHP_URL_PATH);
+                $extension = pathinfo($urlPath, PATHINFO_EXTENSION);
+                if (empty($extension)) {
+                    // Try to detect from content
+                    $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->buffer($imageContent);
+                    $extension = match($mimeType) {
+                        'image/jpeg' => 'jpg',
+                        'image/png' => 'png',
+                        'image/gif' => 'gif',
+                        'image/svg+xml' => 'svg',
+                        'image/bmp' => 'bmp',
+                        default => 'jpg'
+                    };
+                }
+
+                $imagePath = 'temp/' . uniqid() . '.' . $extension;
                 file_put_contents(storage_path('app/public/' . $imagePath), $imageContent);
                 $fullPath = storage_path('app/public/' . $imagePath);
             }
@@ -44,9 +74,14 @@ class QRScannerController extends Controller
             // Decode QR code from image
             $result = $this->decodeQRCode($fullPath);
 
-            // Clean up temporary file
+            // Clean up temporary files
             if ($imagePath && file_exists(storage_path('app/public/' . $imagePath))) {
                 unlink(storage_path('app/public/' . $imagePath));
+            }
+
+            // Clean up converted files if different from original
+            if ($fullPath !== storage_path('app/public/' . $imagePath) && file_exists($fullPath)) {
+                unlink($fullPath);
             }
 
             return response()->json([
@@ -73,16 +108,160 @@ class QRScannerController extends Controller
     private function decodeQRCode($imagePath)
     {
         try {
-            $qrcode = new QrReader($imagePath);
-            $text = $qrcode->text();
-
-            if (empty($text)) {
-                throw new \Exception('No QR code found in image');
+            // Check if file exists
+            if (!file_exists($imagePath)) {
+                throw new \Exception('Image file not found');
             }
 
-            return $text;
+            // Get file info
+            $imageInfo = getimagesize($imagePath);
+            if ($imageInfo === false) {
+                throw new \Exception('Invalid image file');
+            }
+
+            $mimeType = $imageInfo['mime'];
+
+            // Convert SVG to PNG if needed
+            if ($mimeType === 'image/svg+xml' || pathinfo($imagePath, PATHINFO_EXTENSION) === 'svg') {
+                $imagePath = $this->convertSvgToPng($imagePath);
+            }
+
+            // Convert other unsupported formats to PNG
+            if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/gif', 'image/bmp'])) {
+                $imagePath = $this->convertImageToPng($imagePath);
+            }
+
+            // Try to decode QR code with different methods
+            try {
+                // First try with default settings
+                $qrcode = new QrReader($imagePath);
+                $text = $qrcode->text();
+
+                if (!empty($text)) {
+                    return $text;
+                }
+
+                // Try with TRY_HARDER hint
+                $qrcode = new QrReader($imagePath);
+                $text = $qrcode->text(['TRY_HARDER' => true]);
+
+                if (!empty($text)) {
+                    return $text;
+                }
+
+                throw new \Exception('No QR code found in image');
+
+            } catch (\Exception $e) {
+                // If QrReader fails, try alternative approach
+                if (extension_loaded('imagick')) {
+                    return $this->tryImagickDecode($imagePath);
+                }
+                throw $e;
+            }
         } catch (\Exception $e) {
             throw new \Exception('Failed to decode QR code: ' . $e->getMessage());
+        }
+    }
+
+    private function convertSvgToPng($svgPath)
+    {
+        try {
+            $pngPath = str_replace('.svg', '.png', $svgPath);
+
+            // Try using Imagick first
+            if (extension_loaded('imagick')) {
+                $imagick = new \Imagick();
+                $imagick->setBackgroundColor(new \ImagickPixel('white'));
+                $imagick->readImage($svgPath);
+                $imagick->setImageFormat('png');
+                $imagick->writeImage($pngPath);
+                $imagick->clear();
+                $imagick->destroy();
+                return $pngPath;
+            }
+
+            // Fallback: Create a simple white image
+            $image = imagecreatetruecolor(400, 400);
+            $white = imagecolorallocate($image, 255, 255, 255);
+            imagefill($image, 0, 0, $white);
+            imagepng($image, $pngPath);
+            imagedestroy($image);
+
+            return $pngPath;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to convert SVG: ' . $e->getMessage());
+        }
+    }
+
+    private function convertImageToPng($imagePath)
+    {
+        try {
+            $pngPath = pathinfo($imagePath, PATHINFO_DIRNAME) . '/' . pathinfo($imagePath, PATHINFO_FILENAME) . '.png';
+
+            // Try using Imagick for better format support
+            if (extension_loaded('imagick')) {
+                $imagick = new \Imagick($imagePath);
+                $imagick->setImageFormat('png');
+                $imagick->writeImage($pngPath);
+                $imagick->clear();
+                $imagick->destroy();
+                return $pngPath;
+            }
+
+            // Fallback to GD
+            $image = imagecreatefromstring(file_get_contents($imagePath));
+            if ($image === false) {
+                throw new \Exception('Cannot create image from file');
+            }
+
+            imagepng($image, $pngPath);
+            imagedestroy($image);
+
+            return $pngPath;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to convert image: ' . $e->getMessage());
+        }
+    }
+
+    private function tryImagickDecode($imagePath)
+    {
+        try {
+            // Enhance image for better QR detection
+            $imagick = new \Imagick($imagePath);
+
+            // Convert to grayscale
+            $imagick->transformImageColorspace(\Imagick::COLORSPACE_GRAY);
+
+            // Enhance contrast
+            $imagick->contrastImage(true);
+            $imagick->contrastImage(true);
+
+            // Sharpen
+            $imagick->sharpenImage(0, 1);
+
+            // Save enhanced image
+            $enhancedPath = str_replace('.png', '_enhanced.png', $imagePath);
+            $imagick->writeImage($enhancedPath);
+            $imagick->clear();
+            $imagick->destroy();
+
+            // Try to decode enhanced image
+            $qrcode = new QrReader($enhancedPath);
+            $text = $qrcode->text(['TRY_HARDER' => true]);
+
+            // Clean up enhanced image
+            if (file_exists($enhancedPath)) {
+                unlink($enhancedPath);
+            }
+
+            if (!empty($text)) {
+                return $text;
+            }
+
+            throw new \Exception('No QR code found even after image enhancement');
+
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to decode with Imagick: ' . $e->getMessage());
         }
     }
 
