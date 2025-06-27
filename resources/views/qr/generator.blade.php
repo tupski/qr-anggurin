@@ -220,7 +220,12 @@
 
                     <!-- Customization Options -->
                     <div class="border-t border-gray-200 pt-8 mt-8">
-                        <div class="flex items-center mb-6">
+                        <div class="flex items-center mb-6" x-data="{
+                            openSection: 'basic',
+                            toggleSection(section) {
+                                this.openSection = this.openSection === section ? '' : section;
+                            }
+                        }">
                             <div class="w-8 h-8 bg-[#138c79]/10 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-[#138c79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
@@ -228,6 +233,18 @@
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900">Kustomisasi QR Code</h3>
                         </div>
+
+                        <!-- Accordion Sections -->
+                        <div class="space-y-4">
+                            <!-- Basic Settings -->
+                            <div class="border border-gray-200 rounded-lg">
+                                <button @click="toggleSection('basic')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors duration-200">
+                                    <span class="font-medium text-gray-900">Pengaturan Dasar</span>
+                                    <svg class="w-5 h-5 text-gray-500 transition-transform duration-200" :class="openSection === 'basic' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="openSection === 'basic'" x-transition class="p-4 border-t border-gray-200">
 
                         <!-- Size and Margin -->
                         <div class="grid grid-cols-2 gap-6 mb-6">
@@ -498,6 +515,12 @@
                                 </svg>
                                 SVG
                             </button>
+                            <button @click="downloadQR('webp')" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                WebP
+                            </button>
                         </div>
 
                         <!-- Bagikan QR Button -->
@@ -670,37 +693,38 @@ function qrGenerator() {
             if (!this.qrImage) return;
 
             try {
-                // Convert current QR image to different formats
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
+                const formData = new FormData();
+                formData.append('format', format);
 
-                img.onload = () => {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-
-                    if (format === 'jpg') {
-                        // Fill white background for JPG
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Add all form data
+                Object.keys(this.form).forEach(key => {
+                    if (key === 'logo' && this.form.logoType === 'upload' && this.form[key]) {
+                        formData.append(key, this.form[key]);
+                    } else if (key === 'defaultLogo' && this.form.logoType === 'default' && this.form[key]) {
+                        formData.append(key, this.form[key]);
+                    } else if (key !== 'logo' && key !== 'defaultLogo' && this.form[key] !== null && this.form[key] !== '') {
+                        formData.append(key, this.form[key]);
                     }
+                });
 
-                    ctx.drawImage(img, 0, 0);
-
-                    if (format === 'svg') {
-                        // For SVG, we'll download the original PNG as SVG isn't directly supported
-                        this.downloadFile(this.qrImage, `qrcode.png`);
-                    } else {
-                        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
-                        canvas.toBlob((blob) => {
-                            const url = URL.createObjectURL(blob);
-                            this.downloadFile(url, `qrcode.${format}`);
-                            URL.revokeObjectURL(url);
-                        }, mimeType, 0.9);
+                const response = await fetch('{{ route("qr.download") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
-                };
+                });
 
-                img.src = this.qrImage;
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    this.downloadFile(url, `qrcode.${format}`);
+                    URL.revokeObjectURL(url);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Download Error:', errorData);
+                    alert('Error downloading QR code: ' + (errorData.error || 'Unknown error'));
+                }
             } catch (error) {
                 console.error('Error downloading QR:', error);
                 alert('Gagal download QR Code');

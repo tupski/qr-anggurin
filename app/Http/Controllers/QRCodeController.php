@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Writer\SvgWriter;
+use Endroid\QrCode\Writer\WebPWriter;
 use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Logo\Logo;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -31,6 +33,11 @@ class QRCodeController extends Controller
                 'logoType' => 'nullable|in:none,default,upload',
                 'defaultLogo' => 'nullable|string',
                 'logoSize' => 'nullable|integer|min:10|max:30',
+                'frame_style' => 'nullable|in:none,square,circle,rounded',
+                'frame_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'inner_eye_style' => 'nullable|in:square,circle,rounded,leaf',
+                'outer_eye_style' => 'nullable|in:square,circle,rounded,leaf',
+                'data_style' => 'nullable|in:square,circle,rounded,dot',
                 // Additional validations for specific types
                 'phone' => 'required_if:type,sms,whatsapp,phone|nullable|string|max:20',
                 'email' => 'required_if:type,email|nullable|email|max:255',
@@ -105,6 +112,7 @@ class QRCodeController extends Controller
             $logoSize = ($request->logoSize ?? 20) * ($request->size ?? 300) / 100;
             $logo = Logo::create(storage_path('app/public/' . $logoPath))
                 ->setResizeToWidth($logoSize)
+                ->setResizeToHeight($logoSize)
                 ->setPunchoutBackground(true);
         }
 
@@ -199,5 +207,144 @@ class QRCodeController extends Controller
             'g' => hexdec(substr($hex, 2, 2)),
             'b' => hexdec(substr($hex, 4, 2))
         ];
+    }
+
+    public function download(Request $request)
+    {
+        try {
+            $request->validate([
+                'format' => 'required|in:png,jpg,svg,webp',
+                'type' => 'required|in:text,url,sms,whatsapp,phone,email,location,wifi,vcard',
+                'content' => 'required_unless:type,sms,whatsapp,email,location,wifi,vcard|string|max:2000',
+                'size' => 'nullable|integer|min:100|max:1000',
+                'margin' => 'nullable|integer|min:0|max:50',
+                'error_correction' => 'nullable|in:L,M,Q,H',
+                'foreground_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'background_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'logo' => 'nullable|image|max:2048',
+                'logoType' => 'nullable|in:none,default,upload',
+                'defaultLogo' => 'nullable|string',
+                'logoSize' => 'nullable|integer|min:10|max:30',
+                // Additional validations for specific types
+                'phone' => 'required_if:type,sms,whatsapp,phone|nullable|string|max:20',
+                'email' => 'required_if:type,email|nullable|email|max:255',
+                'latitude' => 'required_if:type,location|nullable|numeric|between:-90,90',
+                'longitude' => 'required_if:type,location|nullable|numeric|between:-180,180',
+                'ssid' => 'required_if:type,wifi|nullable|string|max:32',
+                'name' => 'required_if:type,vcard|nullable|string|max:255',
+            ]);
+
+            $content = $this->formatContent($request->type, $request->all());
+
+            if (empty($content)) {
+                return response()->json(['error' => 'Content cannot be empty'], 400);
+            }
+
+            $qrCode = QrCode::create($content)
+                ->setSize($request->size ?? 300)
+                ->setMargin($request->margin ?? 10);
+
+            // Set error correction level
+            $errorCorrectionLevels = [
+                'L' => ErrorCorrectionLevel::Low,
+                'M' => ErrorCorrectionLevel::Medium,
+                'Q' => ErrorCorrectionLevel::Quartile,
+                'H' => ErrorCorrectionLevel::High,
+            ];
+            $qrCode->setErrorCorrectionLevel($errorCorrectionLevels[$request->error_correction ?? 'M']);
+
+            // Set colors
+            if ($request->foreground_color) {
+                $foregroundColor = $this->hexToRgb($request->foreground_color);
+                $qrCode->setForegroundColor(new Color($foregroundColor['r'], $foregroundColor['g'], $foregroundColor['b']));
+            }
+
+            if ($request->background_color) {
+                $backgroundColor = $this->hexToRgb($request->background_color);
+                $qrCode->setBackgroundColor(new Color($backgroundColor['r'], $backgroundColor['g'], $backgroundColor['b']));
+            }
+
+            // Choose writer based on format
+            $writer = match($request->format) {
+                'svg' => new SvgWriter(),
+                'webp' => new WebPWriter(),
+                default => new PngWriter(),
+            };
+
+            // Handle logo
+            $logo = null;
+            $logoPath = null;
+
+            if ($request->logoType === 'upload' && $request->hasFile('logo')) {
+                // Custom uploaded logo
+                $logoPath = $request->file('logo')->store('temp', 'public');
+                $logoSize = ($request->logoSize ?? 20) * ($request->size ?? 300) / 100;
+                $logo = Logo::create(storage_path('app/public/' . $logoPath))
+                    ->setResizeToWidth($logoSize)
+                    ->setResizeToHeight($logoSize)
+                    ->setPunchoutBackground(true);
+            } elseif ($request->logoType === 'default' && $request->defaultLogo) {
+                // Default logo based on QR type
+                $logoSvg = $this->generateDefaultLogoSVG($request->defaultLogo, $request->foreground_color ?? '#000000');
+                $logoPath = 'temp/default_logo_' . uniqid() . '.svg';
+                file_put_contents(storage_path('app/public/' . $logoPath), $logoSvg);
+
+                $logoSize = ($request->logoSize ?? 20) * ($request->size ?? 300) / 100;
+                $logo = Logo::create(storage_path('app/public/' . $logoPath))
+                    ->setResizeToWidth($logoSize)
+                    ->setResizeToHeight($logoSize)
+                    ->setPunchoutBackground(true);
+            }
+
+            $result = $writer->write($qrCode, $logo);
+
+            // Clean up temporary logo file
+            if ($logo && $logoPath) {
+                unlink(storage_path('app/public/' . $logoPath));
+            }
+
+            // Set appropriate headers based on format
+            $mimeTypes = [
+                'png' => 'image/png',
+                'jpg' => 'image/jpeg',
+                'svg' => 'image/svg+xml',
+                'webp' => 'image/webp'
+            ];
+
+            $filename = 'qrcode.' . $request->format;
+
+            // For JPG format, convert PNG to JPG with white background
+            if ($request->format === 'jpg') {
+                $image = imagecreatefromstring($result->getString());
+                $width = imagesx($image);
+                $height = imagesy($image);
+
+                $jpgImage = imagecreatetruecolor($width, $height);
+                $white = imagecolorallocate($jpgImage, 255, 255, 255);
+                imagefill($jpgImage, 0, 0, $white);
+                imagecopy($jpgImage, $image, 0, 0, 0, 0, $width, $height);
+
+                ob_start();
+                imagejpeg($jpgImage, null, 90);
+                $jpgData = ob_get_contents();
+                ob_end_clean();
+
+                imagedestroy($image);
+                imagedestroy($jpgImage);
+
+                return response($jpgData)
+                    ->header('Content-Type', $mimeTypes[$request->format])
+                    ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            }
+
+            return response($result->getString())
+                ->header('Content-Type', $mimeTypes[$request->format])
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to download QR code: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
