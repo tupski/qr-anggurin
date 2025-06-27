@@ -11,6 +11,16 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" x-data="qrGenerator()" x-init="init()">
+            <!-- Floating Preview Button (Mobile Only) -->
+            <div class="fixed bottom-6 right-6 z-50 lg:hidden" x-show="qrImage" x-transition>
+                <button @click="scrollToPreview()" class="bg-[#138c79] hover:bg-[#0f7a69] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </button>
+            </div>
+
             <!-- Left Panel - Form -->
             <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
                 <form @submit.prevent="generateQR">
@@ -316,7 +326,7 @@
             </div>
 
             <!-- Right Panel - Preview -->
-            <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
+            <div id="preview-section" class="bg-white rounded-xl shadow-xl p-8 border border-gray-100 lg:sticky lg:top-8 lg:self-start">
                 <div class="flex items-center mb-6">
                     <div class="w-8 h-8 bg-[#138c79]/10 rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5 text-[#138c79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -620,6 +630,16 @@ function qrGenerator() {
                 // Fallback to download
                 this.downloadFile(this.qrImage, 'qrcode.png');
                 alert('Gagal share QR Code. File akan didownload sebagai gantinya.');
+            }
+        },
+
+        scrollToPreview() {
+            const previewSection = document.getElementById('preview-section');
+            if (previewSection) {
+                previewSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             }
         }
     }
