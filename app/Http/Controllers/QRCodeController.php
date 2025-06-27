@@ -104,12 +104,14 @@ class QRCodeController extends Controller
                 ->setResizeToWidth($logoSize)
                 ->setPunchoutBackground(true);
         } elseif ($request->logoType === 'default' && $request->defaultLogo) {
-            // Default logo based on QR type
+            // Default logo based on QR type - convert SVG to PNG
             $logoSvg = $this->generateDefaultLogoSVG($request->defaultLogo, $request->foreground_color ?? '#000000');
-            $logoPath = 'temp/default_logo_' . uniqid() . '.svg';
-            file_put_contents(storage_path('app/public/' . $logoPath), $logoSvg);
-
             $logoSize = ($request->logoSize ?? 20) * ($request->size ?? 300) / 100;
+
+            // Convert SVG to PNG using Imagick or GD
+            $logoPath = 'temp/default_logo_' . uniqid() . '.png';
+            $this->convertSvgToPng($logoSvg, storage_path('app/public/' . $logoPath), $logoSize);
+
             $logo = Logo::create(storage_path('app/public/' . $logoPath))
                 ->setResizeToWidth($logoSize)
                 ->setResizeToHeight($logoSize)
@@ -123,9 +125,18 @@ class QRCodeController extends Controller
             unlink(storage_path('app/public/' . $logoPath));
         }
 
-            return response($result->getString())
+            // Return QR with styling information
+            $response = response($result->getString())
                 ->header('Content-Type', $result->getMimeType())
                 ->header('Content-Disposition', 'inline; filename="qrcode.png"');
+
+            // Add custom headers for styling
+            if ($request->frame_style && $request->frame_style !== 'none') {
+                $response->header('X-Frame-Style', $request->frame_style);
+                $response->header('X-Frame-Color', $request->frame_color ?? '#138c79');
+            }
+
+            return $response;
 
         } catch (\Exception $e) {
             return response()->json([
@@ -155,6 +166,74 @@ class QRCodeController extends Controller
     <rect width="24" height="24" fill="white" rx="4"/>
     ' . $icon . '
 </svg>';
+    }
+
+    private function convertSvgToPng($svgContent, $outputPath, $size)
+    {
+        try {
+            // Try using Imagick first
+            if (extension_loaded('imagick')) {
+                $imagick = new \Imagick();
+                $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
+                $imagick->readImageBlob($svgContent);
+                $imagick->setImageFormat('png');
+                $imagick->resizeImage($size, $size, \Imagick::FILTER_LANCZOS, 1);
+                $imagick->writeImage($outputPath);
+                $imagick->clear();
+                $imagick->destroy();
+                return;
+            }
+        } catch (\Exception $e) {
+            // Fall back to creating a simple PNG with GD
+        }
+
+        // Fallback: Create a simple PNG with GD based on QR type
+        $image = imagecreatetruecolor($size, $size);
+        imagesavealpha($image, true);
+        $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
+        imagefill($image, 0, 0, $transparent);
+
+        // Parse foreground color
+        $foregroundColor = $this->hexToRgb('#138c79'); // Default color
+        $color = imagecolorallocate($image, $foregroundColor['r'], $foregroundColor['g'], $foregroundColor['b']);
+
+        $center = $size / 2;
+        $radius = $size * 0.35;
+
+        // Create different shapes based on QR type
+        switch ($request->defaultLogo ?? 'text') {
+            case 'url':
+            case 'email':
+                // Rectangle for URL/Email
+                $rectSize = $radius * 1.4;
+                imagefilledrectangle($image, $center - $rectSize/2, $center - $rectSize/2,
+                                   $center + $rectSize/2, $center + $rectSize/2, $color);
+                break;
+            case 'phone':
+            case 'sms':
+            case 'whatsapp':
+                // Rounded rectangle for communication
+                $this->imagefilledroundedrectangle($image, $center - $radius, $center - $radius*1.2,
+                                                 $center + $radius, $center + $radius*1.2, $radius*0.3, $color);
+                break;
+            default:
+                // Circle for others
+                imagefilledellipse($image, $center, $center, $radius * 2, $radius * 2, $color);
+                break;
+        }
+
+        imagepng($image, $outputPath);
+        imagedestroy($image);
+    }
+
+    private function imagefilledroundedrectangle($image, $x1, $y1, $x2, $y2, $radius, $color) {
+        // Simple rounded rectangle using arcs
+        imagefilledrectangle($image, $x1 + $radius, $y1, $x2 - $radius, $y2, $color);
+        imagefilledrectangle($image, $x1, $y1 + $radius, $x2, $y2 - $radius, $color);
+        imagefilledellipse($image, $x1 + $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($image, $x2 - $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($image, $x1 + $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($image, $x2 - $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
     }
 
     private function formatContent($type, $data)
@@ -284,12 +363,14 @@ class QRCodeController extends Controller
                     ->setResizeToHeight($logoSize)
                     ->setPunchoutBackground(true);
             } elseif ($request->logoType === 'default' && $request->defaultLogo) {
-                // Default logo based on QR type
+                // Default logo based on QR type - convert SVG to PNG
                 $logoSvg = $this->generateDefaultLogoSVG($request->defaultLogo, $request->foreground_color ?? '#000000');
-                $logoPath = 'temp/default_logo_' . uniqid() . '.svg';
-                file_put_contents(storage_path('app/public/' . $logoPath), $logoSvg);
-
                 $logoSize = ($request->logoSize ?? 20) * ($request->size ?? 300) / 100;
+
+                // Convert SVG to PNG
+                $logoPath = 'temp/default_logo_' . uniqid() . '.png';
+                $this->convertSvgToPng($logoSvg, storage_path('app/public/' . $logoPath), $logoSize);
+
                 $logo = Logo::create(storage_path('app/public/' . $logoPath))
                     ->setResizeToWidth($logoSize)
                     ->setResizeToHeight($logoSize)

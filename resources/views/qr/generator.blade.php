@@ -3,6 +3,58 @@
 @section('title', 'Generator QR Code - QR Anggurin')
 
 @section('content')
+<style>
+.qr-container {
+    position: relative;
+    display: inline-block;
+}
+
+.qr-image {
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.frame-square .qr-image {
+    border: 8px solid var(--frame-color, #138c79);
+    border-radius: 0;
+}
+
+.frame-circle .qr-image {
+    border: 8px solid var(--frame-color, #138c79);
+    border-radius: 50%;
+}
+
+.frame-rounded .qr-image {
+    border: 8px solid var(--frame-color, #138c79);
+    border-radius: 1.5rem;
+}
+
+.frame-square::before,
+.frame-circle::before,
+.frame-rounded::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(45deg, var(--frame-color, #138c79), rgba(255,255,255,0.1));
+    z-index: -1;
+}
+
+.frame-square::before {
+    border-radius: 0;
+}
+
+.frame-circle::before {
+    border-radius: 50%;
+}
+
+.frame-rounded::before {
+    border-radius: 2rem;
+}
+</style>
+
 <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
@@ -582,7 +634,7 @@
                             </div>
                         </div>
                     </div>
-
+                    <br />
                     <button type="submit" class="w-full bg-[#138c79] hover:bg-[#0f7a69] text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" :disabled="loading">
                         <span x-show="!loading" class="flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -624,7 +676,15 @@
                         <p class="text-sm">QR Code akan muncul di sini secara real-time</p>
                     </div>
                     <div x-show="qrImage" class="text-center">
-                        <img :src="qrImage" alt="QR Code" class="max-w-full max-h-80 mx-auto rounded-lg shadow-lg">
+                        <div class="qr-container inline-block"
+                             :class="{
+                                 'frame-square': form.frame_style === 'square',
+                                 'frame-circle': form.frame_style === 'circle',
+                                 'frame-rounded': form.frame_style === 'rounded'
+                             }"
+                             :style="form.frame_style !== 'none' ? `--frame-color: ${form.frame_color}` : ''">
+                            <img :src="qrImage" alt="QR Code" class="max-w-full max-h-80 mx-auto qr-image">
+                        </div>
                         <div class="mt-4 text-sm text-gray-600">
                             <span x-text="form.size + 'x' + form.size + 'px'"></span> •
                             <span x-text="form.error_correction + ' Error Correction'"></span>
