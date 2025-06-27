@@ -73,9 +73,9 @@ QR Anggurin adalah aplikasi web gratis untuk membuat dan memindai QR Code dengan
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
-   DB_DATABASE=anggurin_qr
-   DB_USERNAME=root
-   DB_PASSWORD=mysql
+   DB_DATABASE=
+   DB_USERNAME=
+   DB_PASSWORD=
    ```
 
 5. **Database Migration**
@@ -105,7 +105,7 @@ QR Anggurin adalah aplikasi web gratis untuk membuat dan memindai QR Code dengan
 5. QR Code akan ter-generate secara otomatis
 6. Download QR Code dalam format PNG
 
-### Memindai QR Code
+### Scan QR Code
 1. Kunjungi halaman Scanner
 2. Pilih metode input (Upload file atau URL gambar)
 3. Upload gambar QR Code atau masukkan URL

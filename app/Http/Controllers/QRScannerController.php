@@ -14,11 +14,18 @@ class QRScannerController extends Controller
 
     public function scan(Request $request)
     {
-        $request->validate([
-            'method' => 'required|in:upload,url,camera',
-            'file' => 'required_if:method,upload|image|max:10240',
-            'url' => 'required_if:method,url|url',
-        ]);
+        try {
+            $request->validate([
+                'method' => 'required|in:upload,url,camera',
+                'file' => 'required_if:method,upload|image|max:10240',
+                'url' => 'required_if:method,url|url',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . implode(', ', array_flatten($e->errors()))
+            ], 422);
+        }
 
         try {
             $imagePath = null;
@@ -49,6 +56,13 @@ class QRScannerController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('QR Scan Error: ' . $e->getMessage(), [
+                'method' => $request->method,
+                'file' => $request->hasFile('file') ? $request->file('file')->getClientOriginalName() : null,
+                'url' => $request->url,
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membaca QR Code: ' . $e->getMessage()

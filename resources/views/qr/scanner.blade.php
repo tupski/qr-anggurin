@@ -51,18 +51,33 @@
 
             <!-- Camera -->
             <div x-show="method === 'camera'" class="mb-6">
-                <div class="bg-gray-100 rounded-lg p-4 text-center">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <p class="text-gray-600">Fitur kamera akan segera tersedia</p>
-                    <p class="text-sm text-gray-500 mt-2">Sementara gunakan upload file atau URL gambar</p>
+                <div class="bg-gray-100 rounded-lg p-4">
+                    <div x-show="!cameraActive" class="text-center">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <button @click="startCamera" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium">
+                            Aktifkan Kamera
+                        </button>
+                    </div>
+
+                    <div x-show="cameraActive" class="text-center">
+                        <video x-ref="cameraVideo" class="w-full max-w-md mx-auto rounded-lg mb-4" autoplay playsinline></video>
+                        <div class="flex gap-2 justify-center">
+                            <button @click="stopCamera" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium">
+                                Stop Kamera
+                            </button>
+                            <button @click="captureFromCamera" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium">
+                                Capture & Scan
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Scan Button -->
-            <button @click="scanQR" :disabled="loading || !canScan" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 mb-6">
+            <!-- Scan Button (only for upload and URL methods) -->
+            <button x-show="method !== 'camera'" @click="scanQR" :disabled="loading || !canScan" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 mb-6">
                 <span x-show="!loading">Scan QR Code</span>
                 <span x-show="loading">Scanning...</span>
             </button>
@@ -122,11 +137,12 @@ function qrScanner() {
         error: null,
         imageUrl: '',
         selectedFile: null,
+        cameraActive: false,
+        cameraStream: null,
 
         get canScan() {
             return (this.method === 'upload' && this.selectedFile) ||
-                   (this.method === 'url' && this.imageUrl) ||
-                   (this.method === 'camera');
+                   (this.method === 'url' && this.imageUrl);
         },
 
         handleFileUpload(event) {
@@ -160,13 +176,23 @@ function qrScanner() {
                     }
                 });
 
-                const data = await response.json();
+                const contentType = response.headers.get('content-type');
 
-                if (data.success) {
-                    this.result = data;
-                    this.error = null;
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.result = data;
+                        this.error = null;
+                    } else {
+                        this.error = data.message || 'Gagal scan QR Code';
+                        this.result = null;
+                    }
                 } else {
-                    this.error = data.message || 'Gagal scan QR Code';
+                    // Response is not JSON (probably HTML error page)
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    this.error = 'Server error. Please check the console for details.';
                     this.result = null;
                 }
             } catch (error) {
@@ -200,6 +226,98 @@ function qrScanner() {
         sendEmail() {
             if (this.result?.data) {
                 window.location.href = this.result.data;
+            }
+        },
+
+        async startCamera() {
+            try {
+                this.cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment' // Use back camera if available
+                    }
+                });
+                this.$refs.cameraVideo.srcObject = this.cameraStream;
+                this.cameraActive = true;
+                this.error = null;
+            } catch (error) {
+                console.error('Camera error:', error);
+                this.error = 'Tidak dapat mengakses kamera. Pastikan browser memiliki izin kamera.';
+            }
+        },
+
+        stopCamera() {
+            if (this.cameraStream) {
+                this.cameraStream.getTracks().forEach(track => track.stop());
+                this.cameraStream = null;
+            }
+            this.cameraActive = false;
+        },
+
+        async captureFromCamera() {
+            if (!this.cameraActive || !this.$refs.cameraVideo) {
+                this.error = 'Kamera tidak aktif';
+                return;
+            }
+
+            try {
+                // Create canvas to capture frame
+                const canvas = document.createElement('canvas');
+                const video = this.$refs.cameraVideo;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+
+                // Convert to blob
+                canvas.toBlob(async (blob) => {
+                    if (blob) {
+                        // Create FormData and scan
+                        this.loading = true;
+                        this.result = null;
+                        this.error = null;
+
+                        try {
+                            const formData = new FormData();
+                            formData.append('method', 'upload');
+                            formData.append('file', blob, 'camera-capture.jpg');
+
+                            const response = await fetch('{{ route("qr.scan") }}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            });
+
+                            const contentType = response.headers.get('content-type');
+
+                            if (contentType && contentType.includes('application/json')) {
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    this.result = data;
+                                    this.error = null;
+                                } else {
+                                    this.error = data.message || 'Gagal scan QR Code dari kamera';
+                                    this.result = null;
+                                }
+                            } else {
+                                this.error = 'Server error saat scan dari kamera';
+                                this.result = null;
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            this.error = 'Terjadi kesalahan saat scan dari kamera';
+                        } finally {
+                            this.loading = false;
+                        }
+                    }
+                }, 'image/jpeg', 0.8);
+
+            } catch (error) {
+                console.error('Capture error:', error);
+                this.error = 'Gagal capture gambar dari kamera';
             }
         }
     }
