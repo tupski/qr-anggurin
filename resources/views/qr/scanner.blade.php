@@ -3,6 +3,15 @@
 @section('title', 'Scanner QR Code - QR Anggurin')
 
 @section('content')
+<style>
+/* Loading Animation */
+@keyframes progress {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0%); }
+    100% { transform: translateX(100%); }
+}
+</style>
+
 <div class="py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
@@ -136,6 +145,24 @@
                 <span x-show="!loading">Scan QR Code</span>
                 <span x-show="loading">Scanning...</span>
             </button>
+
+            <!-- Loading Animation -->
+            <div x-show="loading" x-transition class="text-center py-8 mb-6">
+                <div class="relative">
+                    <!-- Enhanced Loading Animation -->
+                    <div class="w-16 h-16 bg-[#138c79]/10 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+                        <svg class="w-8 h-8 text-[#138c79] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <!-- Progress Bar -->
+                    <div class="w-32 h-1 bg-gray-200 rounded-full mx-auto mb-3 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-[#138c79] to-[#0f7a69] rounded-full animate-pulse" style="width: 100%; animation: progress 1.5s ease-in-out infinite;"></div>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-[#138c79]">Scanning QR Code...</p>
+                <p class="text-xs text-gray-500 mt-1">Please wait</p>
+            </div>
 
             <!-- Results -->
             <div x-show="result" class="bg-gray-50 rounded-lg p-6">
