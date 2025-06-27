@@ -10,7 +10,7 @@
             <p class="text-lg text-gray-600">Buat QR Code dengan kustomisasi lengkap</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" x-data="qrGenerator()">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" x-data="qrGenerator()" x-init="init()">
             <!-- Left Panel - Form -->
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <form @submit.prevent="generateQR">
@@ -33,7 +33,7 @@
                     <!-- Dynamic Form Fields -->
                     <div class="mb-6" x-show="form.type === 'text' || form.type === 'url'">
                         <label class="block text-sm font-medium text-gray-700 mb-2" x-text="form.type === 'text' ? 'Teks' : 'URL'"></label>
-                        <textarea x-model="form.content" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="3" :placeholder="form.type === 'text' ? 'Masukkan teks...' : 'https://example.com'"></textarea>
+                        <textarea x-model="form.content" @input="debouncedGenerate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="3" :placeholder="form.type === 'text' ? 'Masukkan teks...' : 'https://example.com'"></textarea>
                     </div>
 
                     <!-- SMS Fields -->
@@ -147,32 +147,32 @@
                     <!-- Customization Options -->
                     <div class="border-t pt-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Kustomisasi</h3>
-                        
+
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Ukuran</label>
-                                <input type="number" x-model="form.size" min="100" max="1000" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="number" x-model="form.size" @input="debouncedGenerate" min="100" max="1000" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Margin</label>
-                                <input type="number" x-model="form.margin" min="0" max="50" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="number" x-model="form.margin" @input="debouncedGenerate" min="0" max="50" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Warna Depan</label>
-                                <input type="color" x-model="form.foreground_color" class="w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="color" x-model="form.foreground_color" @change="debouncedGenerate" class="w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Warna Belakang</label>
-                                <input type="color" x-model="form.background_color" class="w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="color" x-model="form.background_color" @change="debouncedGenerate" class="w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Error Correction</label>
-                            <select x-model="form.error_correction" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select x-model="form.error_correction" @change="debouncedGenerate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="L">Low (7%)</option>
                                 <option value="M">Medium (15%)</option>
                                 <option value="Q">Quartile (25%)</option>
@@ -205,7 +205,7 @@
                     </div>
                     <img x-show="qrImage" :src="qrImage" alt="QR Code" class="max-w-full max-h-96">
                 </div>
-                
+
                 <div x-show="qrImage" class="mt-4">
                     <a :href="qrImage" download="qrcode.png" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 block text-center">
                         Download QR Code
@@ -221,9 +221,10 @@ function qrGenerator() {
     return {
         loading: false,
         qrImage: null,
+        debounceTimer: null,
         form: {
             type: 'text',
-            content: '',
+            content: 'QR Anggurin - Generator QR Code Gratis',
             phone: '',
             message: '',
             email: '',
@@ -244,7 +245,12 @@ function qrGenerator() {
             error_correction: 'M',
             logo: null
         },
-        
+
+        init() {
+            // Generate initial QR code
+            this.generateQR();
+        },
+
         updateFormFields() {
             // Reset form fields when type changes
             this.form.content = '';
@@ -260,14 +266,46 @@ function qrGenerator() {
             this.form.organization = '';
             this.form.website = '';
         },
-        
+
         handleLogoUpload(event) {
             this.form.logo = event.target.files[0];
+            this.debouncedGenerate();
         },
-        
+
+        debouncedGenerate() {
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => {
+                if (this.hasValidContent()) {
+                    this.generateQR();
+                }
+            }, 500);
+        },
+
+        hasValidContent() {
+            switch (this.form.type) {
+                case 'text':
+                case 'url':
+                case 'phone':
+                    return this.form.content.trim() !== '';
+                case 'sms':
+                case 'whatsapp':
+                    return this.form.phone.trim() !== '';
+                case 'email':
+                    return this.form.email.trim() !== '';
+                case 'location':
+                    return this.form.latitude.trim() !== '' && this.form.longitude.trim() !== '';
+                case 'wifi':
+                    return this.form.ssid.trim() !== '';
+                case 'vcard':
+                    return this.form.name.trim() !== '';
+                default:
+                    return true;
+            }
+        },
+
         async generateQR() {
             this.loading = true;
-            
+
             try {
                 const formData = new FormData();
                 Object.keys(this.form).forEach(key => {
@@ -275,7 +313,7 @@ function qrGenerator() {
                         formData.append(key, this.form[key]);
                     }
                 });
-                
+
                 const response = await fetch('{{ route("qr.generate") }}', {
                     method: 'POST',
                     body: formData,
@@ -283,7 +321,7 @@ function qrGenerator() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
-                
+
                 if (response.ok) {
                     const blob = await response.blob();
                     this.qrImage = URL.createObjectURL(blob);
