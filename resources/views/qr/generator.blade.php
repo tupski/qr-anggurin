@@ -878,6 +878,11 @@ function qrGenerator() {
                     const blob = await response.blob();
                     this.qrImage = URL.createObjectURL(blob);
                     this.qrSaved = false; // Reset saved state when new QR is generated
+
+                    // Apply custom styling if needed
+                    this.$nextTick(() => {
+                        this.applyCustomStyling();
+                    });
                 } else {
                     const errorData = await response.json();
                     console.error('QR Generation Error:', errorData);
@@ -1015,6 +1020,47 @@ function qrGenerator() {
                 vcard: `<svg fill="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
             };
             return logos[this.form.type] || logos.text;
+        },
+
+        applyCustomStyling() {
+            // Note: Advanced QR styling (eye shapes, data patterns) requires
+            // specialized QR libraries or post-processing. For now, we'll add
+            // visual feedback that these options are selected.
+
+            const qrContainer = document.querySelector('.qr-container');
+            if (!qrContainer) return;
+
+            // Add styling classes based on selected options
+            qrContainer.classList.remove('style-applied');
+
+            if (this.form.inner_eye_style !== 'square' ||
+                this.form.outer_eye_style !== 'square' ||
+                this.form.data_style !== 'square') {
+                qrContainer.classList.add('style-applied');
+
+                // Add a subtle overlay to indicate custom styling is applied
+                let overlay = qrContainer.querySelector('.style-overlay');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.className = 'style-overlay';
+                    overlay.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(45deg, transparent 49%, rgba(19, 140, 121, 0.1) 50%, transparent 51%);
+                        pointer-events: none;
+                        border-radius: inherit;
+                    `;
+                    qrContainer.appendChild(overlay);
+                }
+            } else {
+                const overlay = qrContainer.querySelector('.style-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+            }
         }
     }
 }
