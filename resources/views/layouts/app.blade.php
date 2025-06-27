@@ -143,7 +143,7 @@
                         <h3 class="text-2xl font-bold text-white">QR Anggurin</h3>
                     </div>
                     <p class="text-gray-300 mb-6 max-w-md">
-                        Generator dan Scanner QR Code gratis terbaik di Indonesia. Buat QR Code untuk berbagai keperluan dengan mudah dan cepat.
+                        Generator dan Scanner QR Code gratis. Buat QR Code untuk berbagai keperluan dengan mudah dan cepat <b>TANPA REGISTRASI!</b>
                     </p>
                     <div class="flex space-x-4">
                         <a href="https://github.com/tupski/qr-anggurin" target="_blank" class="w-10 h-10 bg-gray-700 hover:bg-[#138c79] rounded-lg flex items-center justify-center transition-colors duration-200">
@@ -232,13 +232,14 @@
             <div class="border-t border-gray-700 mt-8 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <div class="text-gray-400 text-sm mb-4 md:mb-0">
-                        © {{ date('Y') }} QR Anggurin. Semua hak cipta dilindungi.
+                        Hak Cipta © {{ date('Y') }} <a class="text-[#138c79] hover:text-[#0f7a69] font-medium transition-colors duration-200" href="/" target="_self">QR Anggurin</a>. Semua hak cipta dilindungi.
                     </div>
                     <div class="flex items-center space-x-6 text-sm">
-                        <span class="text-gray-400">Dibuat dengan ❤️ oleh</span>
-                        <a href="https://github.com/tupski" target="_blank" class="text-[#138c79] hover:text-[#0f7a69] font-medium transition-colors duration-200">
-                            Angga Artupas
-                        </a>
+                        <span class="text-gray-400">Developed by
+                            <a href="https://github.com/tupski" target="_blank" class="text-[#138c79] hover:text-[#0f7a69] font-medium transition-colors duration-200">
+                                Angga Artupas
+                            </a>
+                        </span>
                     </div>
                 </div>
             </div>
