@@ -43,6 +43,12 @@
                         </svg>
                         Kamera
                     </button>
+                    <button @click="method = 'base64'" :class="method === 'base64' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
+                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Base64
+                    </button>
                 </div>
             </div>
 
@@ -113,6 +119,32 @@
                 <input type="url" x-model="imageUrl" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" placeholder="https://example.com/qrcode.png">
             </div>
 
+            <!-- Base64 Input -->
+            <div x-show="method === 'base64'" class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">Base64 Data URL</label>
+                <div class="space-y-3">
+                    <textarea x-model="base64Data" rows="6" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79] font-mono text-sm" placeholder="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."></textarea>
+                    <div class="flex items-center space-x-4">
+                        <button @click="pasteFromClipboard()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#138c79]">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Paste dari Clipboard
+                        </button>
+                        <button @click="clearBase64()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Format yang didukung:</strong> data:image/[type];base64,[data]</p>
+                        <p><strong>Contoh:</strong> data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Camera -->
             <div x-show="method === 'camera'" class="mb-6">
                 <div class="bg-gray-100 rounded-lg p-4">
@@ -140,7 +172,7 @@
                 </div>
             </div>
 
-            <!-- Scan Button (only for upload and URL methods) -->
+            <!-- Scan Button (only for upload, URL, and base64 methods) -->
             <button x-show="method !== 'camera'" @click="scanQR" :disabled="loading || !canScan" class="w-full bg-[#138c79] hover:bg-[#0f7a69] disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 mb-6">
                 <span x-show="!loading">Scan QR Code</span>
                 <span x-show="loading">Scanning...</span>
@@ -218,13 +250,15 @@ function qrScanner() {
         result: null,
         error: null,
         imageUrl: '',
+        base64Data: '',
         selectedFile: null,
         cameraActive: false,
         cameraStream: null,
 
         get canScan() {
             return (this.method === 'upload' && this.selectedFile) ||
-                   (this.method === 'url' && this.imageUrl);
+                   (this.method === 'url' && this.imageUrl) ||
+                   (this.method === 'base64' && this.base64Data.trim());
         },
 
         handleFileUpload(event) {
@@ -260,6 +294,8 @@ function qrScanner() {
                     formData.append('file', this.selectedFile);
                 } else if (this.method === 'url' && this.imageUrl) {
                     formData.append('url', this.imageUrl);
+                } else if (this.method === 'base64' && this.base64Data) {
+                    formData.append('base64', this.base64Data);
                 }
 
                 const response = await fetch('{{ route("qr.scan") }}', {
@@ -321,6 +357,28 @@ function qrScanner() {
             if (this.result?.data) {
                 window.location.href = this.result.data;
             }
+        },
+
+        async pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text.startsWith('data:image/')) {
+                    this.base64Data = text;
+                    this.result = null;
+                    this.error = null;
+                } else {
+                    alert('Clipboard tidak berisi data URL yang valid');
+                }
+            } catch (err) {
+                console.error('Failed to read clipboard:', err);
+                alert('Gagal membaca clipboard. Pastikan browser mendukung clipboard API.');
+            }
+        },
+
+        clearBase64() {
+            this.base64Data = '';
+            this.result = null;
+            this.error = null;
         },
 
         async startCamera() {

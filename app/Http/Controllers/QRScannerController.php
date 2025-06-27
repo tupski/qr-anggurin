@@ -16,9 +16,10 @@ class QRScannerController extends Controller
     {
         try {
             $request->validate([
-                'method' => 'required|in:upload,url,camera',
+                'method' => 'required|in:upload,url,camera,base64',
                 'file' => 'required_if:method,upload|file|max:10240|mimes:jpeg,jpg,png,gif,bmp,svg,webp',
                 'url' => 'required_if:method,url|url',
+                'base64' => 'required_if:method,base64|string',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -65,6 +66,38 @@ class QRScannerController extends Controller
                         default => 'jpg'
                     };
                 }
+
+                $imagePath = 'temp/' . uniqid() . '.' . $extension;
+                file_put_contents(storage_path('app/public/' . $imagePath), $imageContent);
+                $fullPath = storage_path('app/public/' . $imagePath);
+            } elseif ($request->method === 'base64') {
+                // Handle base64 data URL
+                $base64Data = $request->base64;
+
+                // Parse data URL format: data:image/type;base64,actualdata
+                if (!preg_match('/^data:image\/([a-zA-Z0-9+\/]+);base64,(.+)$/', $base64Data, $matches)) {
+                    throw new \Exception('Invalid base64 data URL format');
+                }
+
+                $imageType = $matches[1];
+                $base64Content = $matches[2];
+
+                // Decode base64 content
+                $imageContent = base64_decode($base64Content);
+                if ($imageContent === false) {
+                    throw new \Exception('Failed to decode base64 content');
+                }
+
+                // Map image type to extension
+                $extension = match($imageType) {
+                    'jpeg', 'jpg' => 'jpg',
+                    'png' => 'png',
+                    'gif' => 'gif',
+                    'svg+xml' => 'svg',
+                    'bmp' => 'bmp',
+                    'webp' => 'webp',
+                    default => 'png'
+                };
 
                 $imagePath = 'temp/' . uniqid() . '.' . $extension;
                 file_put_contents(storage_path('app/public/' . $imagePath), $imageContent);
