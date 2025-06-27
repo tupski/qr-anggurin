@@ -17,7 +17,7 @@
                     <!-- QR Type Selection -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Jenis QR Code</label>
-                        <select x-model="form.type" @change="updateFormFields" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select x-model="form.type" @change="updateFormFields" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]">
                             <option value="text">Teks</option>
                             <option value="url">URL/Website</option>
                             <option value="sms">SMS</option>
@@ -33,18 +33,18 @@
                     <!-- Dynamic Form Fields -->
                     <div class="mb-6" x-show="form.type === 'text' || form.type === 'url'">
                         <label class="block text-sm font-medium text-gray-700 mb-2" x-text="form.type === 'text' ? 'Teks' : 'URL'"></label>
-                        <textarea x-model="form.content" @input="debouncedGenerate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="3" :placeholder="form.type === 'text' ? 'Masukkan teks...' : 'https://example.com'"></textarea>
+                        <textarea x-model="form.content" @input="debouncedGenerate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" rows="3" :placeholder="form.type === 'text' ? 'Masukkan teks...' : 'https://example.com'"></textarea>
                     </div>
 
                     <!-- SMS Fields -->
                     <div x-show="form.type === 'sms'">
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon</label>
-                            <input type="text" x-model="form.phone" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="+628123456789">
+                            <input type="text" x-model="form.phone" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" placeholder="+628123456789">
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pesan</label>
-                            <textarea x-model="form.message" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="3" placeholder="Pesan SMS..."></textarea>
+                            <textarea x-model="form.message" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" rows="3" placeholder="Pesan SMS..."></textarea>
                         </div>
                     </div>
 
@@ -52,18 +52,18 @@
                     <div x-show="form.type === 'whatsapp'">
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nomor WhatsApp</label>
-                            <input type="text" x-model="form.phone" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="628123456789">
+                            <input type="text" x-model="form.phone" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" placeholder="628123456789">
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pesan</label>
-                            <textarea x-model="form.message" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="3" placeholder="Pesan WhatsApp..."></textarea>
+                            <textarea x-model="form.message" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" rows="3" placeholder="Pesan WhatsApp..."></textarea>
                         </div>
                     </div>
 
                     <!-- Phone Field -->
                     <div class="mb-6" x-show="form.type === 'phone'">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon</label>
-                        <input type="text" x-model="form.content" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="+628123456789">
+                        <input type="text" x-model="form.content" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79]" placeholder="+628123456789">
                     </div>
 
                     <!-- Email Fields -->
@@ -147,8 +147,8 @@
                     <!-- Customization Options -->
                     <div class="border-t border-gray-200 pt-8 mt-8">
                         <div class="flex items-center mb-6">
-                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-8 h-8 bg-[#138c79]/10 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-[#138c79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
                                 </svg>
                             </div>
@@ -160,24 +160,24 @@
                             <div class="space-y-3">
                                 <label class="block text-sm font-semibold text-gray-700">Ukuran QR Code</label>
                                 <div class="relative">
-                                    <input type="number" x-model="form.size" @input="debouncedGenerate" min="100" max="1000" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 pl-4 pr-12 py-3">
+                                    <input type="number" x-model="form.size" @input="debouncedGenerate" min="100" max="1000" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79] pl-4 pr-12 py-3">
                                     <span class="absolute right-3 top-3 text-sm text-gray-500">px</span>
                                 </div>
                                 <div class="flex justify-between text-xs text-gray-500">
                                     <span>100px</span>
-                                    <span x-text="form.size + 'px'" class="font-medium text-primary-600"></span>
+                                    <span x-text="form.size + 'px'" class="font-medium text-[#138c79]"></span>
                                     <span>1000px</span>
                                 </div>
                             </div>
                             <div class="space-y-3">
                                 <label class="block text-sm font-semibold text-gray-700">Margin</label>
                                 <div class="relative">
-                                    <input type="number" x-model="form.margin" @input="debouncedGenerate" min="0" max="50" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 pl-4 pr-12 py-3">
+                                    <input type="number" x-model="form.margin" @input="debouncedGenerate" min="0" max="50" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79] pl-4 pr-12 py-3">
                                     <span class="absolute right-3 top-3 text-sm text-gray-500">px</span>
                                 </div>
                                 <div class="flex justify-between text-xs text-gray-500">
                                     <span>0px</span>
-                                    <span x-text="form.margin + 'px'" class="font-medium text-primary-600"></span>
+                                    <span x-text="form.margin + 'px'" class="font-medium text-[#138c79]"></span>
                                     <span>50px</span>
                                 </div>
                             </div>
@@ -193,7 +193,7 @@
                                         <div class="absolute inset-0 rounded-lg border-2 border-gray-300 pointer-events-none"></div>
                                     </div>
                                     <div class="flex-1">
-                                        <input type="text" x-model="form.foreground_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 text-sm font-mono">
+                                        <input type="text" x-model="form.foreground_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79] py-2 px-3 text-sm font-mono">
                                     </div>
                                 </div>
                             </div>
@@ -205,7 +205,7 @@
                                         <div class="absolute inset-0 rounded-lg border-2 border-gray-300 pointer-events-none"></div>
                                     </div>
                                     <div class="flex-1">
-                                        <input type="text" x-model="form.background_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 text-sm font-mono">
+                                        <input type="text" x-model="form.background_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79] py-2 px-3 text-sm font-mono">
                                     </div>
                                 </div>
                             </div>
@@ -215,19 +215,19 @@
                         <div class="mb-6">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Error Correction Level</label>
                             <div class="grid grid-cols-4 gap-2">
-                                <button type="button" @click="form.error_correction = 'L'; debouncedGenerate()" :class="form.error_correction === 'L' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                <button type="button" @click="form.error_correction = 'L'; debouncedGenerate()" :class="form.error_correction === 'L' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
                                     <div class="font-bold">L</div>
                                     <div class="text-xs">7%</div>
                                 </button>
-                                <button type="button" @click="form.error_correction = 'M'; debouncedGenerate()" :class="form.error_correction === 'M' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                <button type="button" @click="form.error_correction = 'M'; debouncedGenerate()" :class="form.error_correction === 'M' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
                                     <div class="font-bold">M</div>
                                     <div class="text-xs">15%</div>
                                 </button>
-                                <button type="button" @click="form.error_correction = 'Q'; debouncedGenerate()" :class="form.error_correction === 'Q' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                <button type="button" @click="form.error_correction = 'Q'; debouncedGenerate()" :class="form.error_correction === 'Q' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
                                     <div class="font-bold">Q</div>
                                     <div class="text-xs">25%</div>
                                 </button>
-                                <button type="button" @click="form.error_correction = 'H'; debouncedGenerate()" :class="form.error_correction === 'H' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                <button type="button" @click="form.error_correction = 'H'; debouncedGenerate()" :class="form.error_correction === 'H' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
                                     <div class="font-bold">H</div>
                                     <div class="text-xs">30%</div>
                                 </button>
@@ -297,7 +297,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" :disabled="loading">
+                    <button type="submit" class="w-full bg-[#138c79] hover:bg-[#0f7a69] text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" :disabled="loading">
                         <span x-show="!loading" class="flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -318,8 +318,8 @@
             <!-- Right Panel - Preview -->
             <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
                 <div class="flex items-center mb-6">
-                    <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-8 h-8 bg-[#138c79]/10 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-[#138c79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
@@ -346,19 +346,46 @@
                     </div>
                 </div>
 
-                <div x-show="qrImage" class="mt-6 space-y-3">
-                    <a :href="qrImage" download="qrcode.png" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-200 block text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <div x-show="qrImage" class="mt-6 space-y-4">
+                    <!-- Simpan QR Button -->
+                    <button @click="saveQR()" x-show="!qrSaved" class="w-full bg-[#138c79] hover:bg-[#0f7a69] text-white font-semibold py-3 px-4 rounded-xl transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
-                        Download QR Code
-                    </a>
-                    <button @click="navigator.share && navigator.share({title: 'QR Code', files: [new File([qrImage], 'qrcode.png', {type: 'image/png'})]})" x-show="navigator.share" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition duration-200">
-                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                        </svg>
-                        Share QR Code
+                        Simpan QR
                     </button>
+
+                    <!-- Download Options -->
+                    <div x-show="qrSaved" class="space-y-3">
+                        <div class="flex gap-3 justify-center">
+                            <button @click="downloadQR('png')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                PNG
+                            </button>
+                            <button @click="downloadQR('jpg')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                JPG
+                            </button>
+                            <button @click="downloadQR('svg')" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                SVG
+                            </button>
+                        </div>
+
+                        <!-- Bagikan QR Button -->
+                        <button @click="shareQR()" class="w-full bg-[#138c79] hover:bg-[#0f7a69] text-white font-semibold py-3 px-4 rounded-xl transition duration-200 shadow-lg hover:shadow-xl">
+                            <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                            </svg>
+                            Bagikan QR
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -370,6 +397,7 @@ function qrGenerator() {
     return {
         loading: false,
         qrImage: null,
+        qrSaved: false,
         debounceTimer: null,
         form: {
             type: 'text',
@@ -485,6 +513,7 @@ function qrGenerator() {
                 if (response.ok) {
                     const blob = await response.blob();
                     this.qrImage = URL.createObjectURL(blob);
+                    this.qrSaved = false; // Reset saved state when new QR is generated
                 } else {
                     const errorData = await response.json();
                     console.error('QR Generation Error:', errorData);
@@ -501,6 +530,96 @@ function qrGenerator() {
                 }
             } finally {
                 this.loading = false;
+            }
+        },
+
+        saveQR() {
+            this.qrSaved = true;
+        },
+
+        async downloadQR(format) {
+            if (!this.qrImage) return;
+
+            try {
+                // Convert current QR image to different formats
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    if (format === 'jpg') {
+                        // Fill white background for JPG
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+
+                    ctx.drawImage(img, 0, 0);
+
+                    if (format === 'svg') {
+                        // For SVG, we'll download the original PNG as SVG isn't directly supported
+                        this.downloadFile(this.qrImage, `qrcode.png`);
+                    } else {
+                        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+                        canvas.toBlob((blob) => {
+                            const url = URL.createObjectURL(blob);
+                            this.downloadFile(url, `qrcode.${format}`);
+                            URL.revokeObjectURL(url);
+                        }, mimeType, 0.9);
+                    }
+                };
+
+                img.src = this.qrImage;
+            } catch (error) {
+                console.error('Error downloading QR:', error);
+                alert('Gagal download QR Code');
+            }
+        },
+
+        downloadFile(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        },
+
+        async shareQR() {
+            if (!this.qrImage) return;
+
+            try {
+                // Convert blob URL to actual blob
+                const response = await fetch(this.qrImage);
+                const blob = await response.blob();
+                const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'QR Code - QR Anggurin',
+                        text: 'QR Code yang dibuat dengan QR Anggurin',
+                        files: [file]
+                    });
+                } else if (navigator.clipboard && navigator.clipboard.write) {
+                    // Fallback: copy to clipboard
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            'image/png': blob
+                        })
+                    ]);
+                    alert('QR Code berhasil disalin ke clipboard!');
+                } else {
+                    // Final fallback: download
+                    this.downloadFile(this.qrImage, 'qrcode.png');
+                    alert('Browser tidak mendukung sharing. QR Code akan didownload.');
+                }
+            } catch (error) {
+                console.error('Error sharing QR:', error);
+                // Fallback to download
+                this.downloadFile(this.qrImage, 'qrcode.png');
+                alert('Gagal share QR Code. File akan didownload sebagai gantinya.');
             }
         }
     }
