@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Zxing\QrReader;
 
 class QRScannerController extends Controller
 {
@@ -33,8 +34,7 @@ class QRScannerController extends Controller
                 $fullPath = storage_path('app/public/' . $imagePath);
             }
 
-            // Use zxing-php library for QR code reading
-            // For now, we'll return a placeholder response
+            // Decode QR code from image
             $result = $this->decodeQRCode($fullPath);
 
             // Clean up temporary file
@@ -58,23 +58,32 @@ class QRScannerController extends Controller
 
     private function decodeQRCode($imagePath)
     {
-        // Placeholder implementation
-        // In a real implementation, you would use a QR code reading library
-        // like zxing-php or similar
-        return "Sample QR Code content from: " . basename($imagePath);
+        try {
+            $qrcode = new QrReader($imagePath);
+            $text = $qrcode->text();
+
+            if (empty($text)) {
+                throw new \Exception('No QR code found in image');
+            }
+
+            return $text;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to decode QR code: ' . $e->getMessage());
+        }
     }
 
     private function detectQRType($content)
     {
-        if (filter_var($content, FILTER_VALIDATE_URL)) {
-            return 'url';
-        } elseif (strpos($content, 'tel:') === 0) {
+        $content = trim($content);
+
+        // Check for specific protocols/formats
+        if (strpos($content, 'tel:') === 0) {
             return 'phone';
         } elseif (strpos($content, 'mailto:') === 0) {
             return 'email';
         } elseif (strpos($content, 'sms:') === 0) {
             return 'sms';
-        } elseif (strpos($content, 'https://wa.me/') === 0) {
+        } elseif (strpos($content, 'https://wa.me/') === 0 || strpos($content, 'https://api.whatsapp.com/') === 0) {
             return 'whatsapp';
         } elseif (strpos($content, 'geo:') === 0) {
             return 'location';
@@ -82,6 +91,8 @@ class QRScannerController extends Controller
             return 'wifi';
         } elseif (strpos($content, 'BEGIN:VCARD') === 0) {
             return 'vcard';
+        } elseif (filter_var($content, FILTER_VALIDATE_URL)) {
+            return 'url';
         } else {
             return 'text';
         }

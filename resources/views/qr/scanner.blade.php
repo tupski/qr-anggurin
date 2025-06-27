@@ -70,7 +70,7 @@
             <!-- Results -->
             <div x-show="result" class="bg-gray-50 rounded-lg p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Hasil Scan</h3>
-                
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Jenis QR Code</label>
                     <span x-text="result?.type || 'Unknown'" class="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium"></span>
@@ -78,8 +78,8 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Konten</label>
-                    <div class="bg-white p-4 rounded-md border">
-                        <p x-text="result?.data || 'No data'" class="break-all"></p>
+                    <div class="bg-white p-4 rounded-md border max-h-40 overflow-y-auto">
+                        <p x-text="result?.data || 'No data'" class="break-all whitespace-pre-wrap text-sm"></p>
                     </div>
                 </div>
 
@@ -122,36 +122,36 @@ function qrScanner() {
         error: null,
         imageUrl: '',
         selectedFile: null,
-        
+
         get canScan() {
-            return (this.method === 'upload' && this.selectedFile) || 
+            return (this.method === 'upload' && this.selectedFile) ||
                    (this.method === 'url' && this.imageUrl) ||
                    (this.method === 'camera');
         },
-        
+
         handleFileUpload(event) {
             this.selectedFile = event.target.files[0];
             this.result = null;
             this.error = null;
         },
-        
+
         async scanQR() {
             if (!this.canScan) return;
-            
+
             this.loading = true;
             this.result = null;
             this.error = null;
-            
+
             try {
                 const formData = new FormData();
                 formData.append('method', this.method);
-                
+
                 if (this.method === 'upload' && this.selectedFile) {
                     formData.append('file', this.selectedFile);
                 } else if (this.method === 'url' && this.imageUrl) {
                     formData.append('url', this.imageUrl);
                 }
-                
+
                 const response = await fetch('{{ route("qr.scan") }}', {
                     method: 'POST',
                     body: formData,
@@ -159,13 +159,15 @@ function qrScanner() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     this.result = data;
+                    this.error = null;
                 } else {
                     this.error = data.message || 'Gagal scan QR Code';
+                    this.result = null;
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -174,7 +176,7 @@ function qrScanner() {
                 this.loading = false;
             }
         },
-        
+
         copyToClipboard() {
             if (this.result?.data) {
                 navigator.clipboard.writeText(this.result.data).then(() => {
@@ -182,19 +184,19 @@ function qrScanner() {
                 });
             }
         },
-        
+
         openUrl() {
             if (this.result?.data) {
                 window.open(this.result.data, '_blank');
             }
         },
-        
+
         callPhone() {
             if (this.result?.data) {
                 window.location.href = this.result.data;
             }
         },
-        
+
         sendEmail() {
             if (this.result?.data) {
                 window.location.href = this.result.data;
