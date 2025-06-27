@@ -53,6 +53,28 @@
 .frame-rounded::before {
     border-radius: 2rem;
 }
+
+/* Loading Animation */
+@keyframes progress {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.qr-container {
+    animation: fadeInScale 0.5s ease-out;
+}
 </style>
 
 <div class="py-8">
@@ -665,8 +687,29 @@
                     <h3 class="text-xl font-semibold text-gray-900">Live Preview</h3>
                 </div>
 
-                <div class="flex items-center justify-center min-h-96 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-200">
-                    <div x-show="!qrImage" class="text-center text-gray-500">
+                <div class="flex items-center justify-center min-h-96 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-200 relative">
+                    <!-- Loading Overlay -->
+                    <div x-show="loading" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                        <div class="text-center">
+                            <div class="relative">
+                                <!-- Spinning QR Icon -->
+                                <div class="w-16 h-16 bg-[#138c79]/10 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+                                    <svg class="w-8 h-8 text-[#138c79] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                </div>
+                                <!-- Progress Bar -->
+                                <div class="w-32 h-1 bg-gray-200 rounded-full mx-auto mb-3 overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-[#138c79] to-[#0f7a69] rounded-full animate-pulse" style="width: 100%; animation: progress 1.5s ease-in-out infinite;"></div>
+                                </div>
+                            </div>
+                            <p class="text-sm font-medium text-[#138c79]">Generating QR Code...</p>
+                            <p class="text-xs text-gray-500 mt-1">Please wait</p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div x-show="!qrImage && !loading" x-transition class="text-center text-gray-500">
                         <div class="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
                             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -675,7 +718,9 @@
                         <p class="text-lg font-medium">QR Code Preview</p>
                         <p class="text-sm">QR Code akan muncul di sini secara real-time</p>
                     </div>
-                    <div x-show="qrImage" class="text-center">
+
+                    <!-- QR Code Display -->
+                    <div x-show="qrImage && !loading" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="text-center">
                         <div class="qr-container inline-block"
                              :class="{
                                  'frame-square': form.frame_style === 'square',
@@ -784,8 +829,10 @@ function qrGenerator() {
         },
 
         init() {
-            // Generate initial QR code
-            this.generateQR();
+            // Generate initial QR code with auto-update
+            this.$nextTick(() => {
+                this.autoGenerate();
+            });
         },
 
         updateFormFields() {
@@ -802,11 +849,59 @@ function qrGenerator() {
             this.form.name = '';
             this.form.organization = '';
             this.form.website = '';
+
+            // Set default content based on type
+            switch(this.form.type) {
+                case 'text':
+                    this.form.content = 'QR Anggurin - Generator QR Code Gratis';
+                    break;
+                case 'url':
+                    this.form.content = 'https://qr-anggurin.com';
+                    break;
+                case 'sms':
+                    this.form.phone = '+62812345678';
+                    this.form.message = 'Halo dari QR Anggurin!';
+                    break;
+                case 'whatsapp':
+                    this.form.phone = '+62812345678';
+                    this.form.message = 'Halo! Saya tertarik dengan layanan Anda.';
+                    break;
+                case 'phone':
+                    this.form.phone = '+62812345678';
+                    break;
+                case 'email':
+                    this.form.email = 'hello@qr-anggurin.com';
+                    this.form.subject = 'Pertanyaan tentang QR Anggurin';
+                    this.form.body = 'Halo, saya ingin bertanya tentang...';
+                    break;
+                case 'location':
+                    this.form.latitude = '-6.2088';
+                    this.form.longitude = '106.8456';
+                    break;
+                case 'wifi':
+                    this.form.ssid = 'QR-Anggurin-WiFi';
+                    this.form.password = 'password123';
+                    this.form.security = 'WPA';
+                    break;
+                case 'vcard':
+                    this.form.name = 'QR Anggurin';
+                    this.form.organization = 'QR Generator Indonesia';
+                    this.form.title = 'QR Code Service';
+                    this.form.phone = '+62812345678';
+                    this.form.email = 'contact@qr-anggurin.com';
+                    this.form.website = 'https://qr-anggurin.com';
+                    break;
+            }
+
+            // Auto-generate QR after updating fields
+            this.$nextTick(() => {
+                this.autoGenerate();
+            });
         },
 
         handleLogoUpload(event) {
             this.form.logo = event.target.files[0];
-            this.debouncedGenerate();
+            this.autoGenerate();
         },
 
         handleLogoDrop(event) {
@@ -815,18 +910,23 @@ function qrGenerator() {
                 const file = files[0];
                 if (file.type.startsWith('image/')) {
                     this.form.logo = file;
-                    this.debouncedGenerate();
+                    this.autoGenerate();
                 }
             }
         },
 
-        debouncedGenerate() {
+        autoGenerate() {
             clearTimeout(this.debounceTimer);
             this.debounceTimer = setTimeout(() => {
                 if (this.hasValidContent()) {
                     this.generateQR();
                 }
-            }, 500);
+            }, 300); // Reduced delay for faster response
+        },
+
+        debouncedGenerate() {
+            // Keep for backward compatibility
+            this.autoGenerate();
         },
 
         hasValidContent() {
