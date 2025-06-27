@@ -219,13 +219,13 @@
                     </div>
 
                     <!-- Customization Options -->
-                    <div class="border-t border-gray-200 pt-8 mt-8">
-                        <div class="flex items-center mb-6" x-data="{
-                            openSection: 'basic',
-                            toggleSection(section) {
-                                this.openSection = this.openSection === section ? '' : section;
-                            }
-                        }">
+                    <div class="border-t border-gray-200 pt-8 mt-8" x-data="{
+                        openSection: 'basic',
+                        toggleSection(section) {
+                            this.openSection = this.openSection === section ? '' : section;
+                        }
+                    }">
+                        <div class="flex items-center mb-6">
                             <div class="w-8 h-8 bg-[#138c79]/10 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-[#138c79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
@@ -434,6 +434,153 @@
                                 <p class="text-xs text-gray-500 mt-2">Logo akan ditempatkan di tengah QR dengan margin yang aman</p>
                             </div>
                         </div>
+                                </div>
+                            </div>
+
+                            <!-- Frame Settings -->
+                            <div class="border border-gray-200 rounded-lg">
+                                <button @click="toggleSection('frame')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors duration-200">
+                                    <span class="font-medium text-gray-900">Frame & Border</span>
+                                    <svg class="w-5 h-5 text-gray-500 transition-transform duration-200" :class="openSection === 'frame' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="openSection === 'frame'" x-transition class="p-4 border-t border-gray-200">
+                                    <!-- Frame Style -->
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Style Frame</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button type="button" @click="form.frame_style = 'none'; debouncedGenerate()"
+                                                    :class="form.frame_style === 'none' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Tanpa Frame
+                                            </button>
+                                            <button type="button" @click="form.frame_style = 'square'; debouncedGenerate()"
+                                                    :class="form.frame_style === 'square' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Square
+                                            </button>
+                                            <button type="button" @click="form.frame_style = 'circle'; debouncedGenerate()"
+                                                    :class="form.frame_style === 'circle' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Circle
+                                            </button>
+                                            <button type="button" @click="form.frame_style = 'rounded'; debouncedGenerate()"
+                                                    :class="form.frame_style === 'rounded' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Rounded
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Frame Color -->
+                                    <div x-show="form.frame_style !== 'none'" class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Warna Frame</label>
+                                        <div class="flex items-center space-x-3">
+                                            <div class="relative">
+                                                <input type="color" x-model="form.frame_color" @change="debouncedGenerate" class="w-16 h-12 rounded-lg border-2 border-gray-300 cursor-pointer shadow-sm">
+                                                <div class="absolute inset-0 rounded-lg border-2 border-gray-300 pointer-events-none"></div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <input type="text" x-model="form.frame_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#138c79] focus:ring-[#138c79] py-2 px-3 text-sm font-mono">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QR Style Settings -->
+                            <div class="border border-gray-200 rounded-lg">
+                                <button @click="toggleSection('style')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors duration-200">
+                                    <span class="font-medium text-gray-900">Style QR Code</span>
+                                    <svg class="w-5 h-5 text-gray-500 transition-transform duration-200" :class="openSection === 'style' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="openSection === 'style'" x-transition class="p-4 border-t border-gray-200">
+                                    <!-- Inner Eye Style -->
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Style Inner Eye</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button type="button" @click="form.inner_eye_style = 'square'; debouncedGenerate()"
+                                                    :class="form.inner_eye_style === 'square' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Square
+                                            </button>
+                                            <button type="button" @click="form.inner_eye_style = 'circle'; debouncedGenerate()"
+                                                    :class="form.inner_eye_style === 'circle' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Circle
+                                            </button>
+                                            <button type="button" @click="form.inner_eye_style = 'rounded'; debouncedGenerate()"
+                                                    :class="form.inner_eye_style === 'rounded' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Rounded
+                                            </button>
+                                            <button type="button" @click="form.inner_eye_style = 'leaf'; debouncedGenerate()"
+                                                    :class="form.inner_eye_style === 'leaf' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Leaf
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Outer Eye Style -->
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Style Outer Eye</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button type="button" @click="form.outer_eye_style = 'square'; debouncedGenerate()"
+                                                    :class="form.outer_eye_style === 'square' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Square
+                                            </button>
+                                            <button type="button" @click="form.outer_eye_style = 'circle'; debouncedGenerate()"
+                                                    :class="form.outer_eye_style === 'circle' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Circle
+                                            </button>
+                                            <button type="button" @click="form.outer_eye_style = 'rounded'; debouncedGenerate()"
+                                                    :class="form.outer_eye_style === 'rounded' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Rounded
+                                            </button>
+                                            <button type="button" @click="form.outer_eye_style = 'leaf'; debouncedGenerate()"
+                                                    :class="form.outer_eye_style === 'leaf' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Leaf
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Data Style -->
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Style Data Pattern</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button type="button" @click="form.data_style = 'square'; debouncedGenerate()"
+                                                    :class="form.data_style === 'square' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Square
+                                            </button>
+                                            <button type="button" @click="form.data_style = 'circle'; debouncedGenerate()"
+                                                    :class="form.data_style === 'circle' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Circle
+                                            </button>
+                                            <button type="button" @click="form.data_style = 'rounded'; debouncedGenerate()"
+                                                    :class="form.data_style === 'rounded' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Rounded
+                                            </button>
+                                            <button type="button" @click="form.data_style = 'dot'; debouncedGenerate()"
+                                                    :class="form.data_style === 'dot' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                Dot
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <button type="submit" class="w-full bg-[#138c79] hover:bg-[#0f7a69] text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" :disabled="loading">
@@ -568,7 +715,12 @@ function qrGenerator() {
             logo: null,
             logoType: 'none',
             defaultLogo: null,
-            logoSize: 20
+            logoSize: 20,
+            frame_style: 'none',
+            frame_color: '#138c79',
+            inner_eye_style: 'square',
+            outer_eye_style: 'square',
+            data_style: 'square'
         },
 
         init() {
