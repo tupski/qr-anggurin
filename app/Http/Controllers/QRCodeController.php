@@ -18,22 +18,41 @@ class QRCodeController extends Controller
 
     public function generate(Request $request)
     {
-        $request->validate([
-            'type' => 'required|in:text,url,sms,whatsapp,phone,email,location,wifi,vcard',
-            'content' => 'required|string',
-            'size' => 'nullable|integer|min:100|max:1000',
-            'margin' => 'nullable|integer|min:0|max:50',
-            'error_correction' => 'nullable|in:L,M,Q,H',
-            'foreground_color' => 'nullable|string',
-            'background_color' => 'nullable|string',
-            'logo' => 'nullable|image|max:2048',
-        ]);
+        try {
+            $request->validate([
+                'type' => 'required|in:text,url,sms,whatsapp,phone,email,location,wifi,vcard',
+                'content' => 'required_unless:type,sms,whatsapp,email,location,wifi,vcard|string|max:2000',
+                'size' => 'nullable|integer|min:100|max:1000',
+                'margin' => 'nullable|integer|min:0|max:50',
+                'error_correction' => 'nullable|in:L,M,Q,H',
+                'foreground_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'background_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'logo' => 'nullable|image|max:2048',
+                // Additional validations for specific types
+                'phone' => 'required_if:type,sms,whatsapp,phone|nullable|string|max:20',
+                'email' => 'required_if:type,email|nullable|email|max:255',
+                'latitude' => 'required_if:type,location|nullable|numeric|between:-90,90',
+                'longitude' => 'required_if:type,location|nullable|numeric|between:-180,180',
+                'ssid' => 'required_if:type,wifi|nullable|string|max:32',
+                'name' => 'required_if:type,vcard|nullable|string|max:255',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->errors()
+            ], 422);
+        }
 
-        $content = $this->formatContent($request->type, $request->all());
+        try {
+            $content = $this->formatContent($request->type, $request->all());
 
-        $qrCode = QrCode::create($content)
-            ->setSize($request->size ?? 300)
-            ->setMargin($request->margin ?? 10);
+            if (empty($content)) {
+                return response()->json(['error' => 'Content cannot be empty'], 400);
+            }
+
+            $qrCode = QrCode::create($content)
+                ->setSize($request->size ?? 300)
+                ->setMargin($request->margin ?? 10);
 
         // Set error correction level
         switch ($request->error_correction ?? 'M') {
@@ -78,32 +97,56 @@ class QRCodeController extends Controller
             unlink(storage_path('app/public/' . $logoPath));
         }
 
-        return response($result->getString())
-            ->header('Content-Type', $result->getMimeType())
-            ->header('Content-Disposition', 'inline; filename="qrcode.png"');
+            return response($result->getString())
+                ->header('Content-Type', $result->getMimeType())
+                ->header('Content-Disposition', 'inline; filename="qrcode.png"');
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to generate QR code: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     private function formatContent($type, $data)
     {
         switch ($type) {
             case 'url':
-                return $data['content'];
+                return $data['content'] ?? '';
             case 'sms':
-                return "sms:" . $data['phone'] . "?body=" . urlencode($data['message'] ?? '');
+                $phone = $data['phone'] ?? '';
+                $message = $data['message'] ?? '';
+                return $phone ? "sms:" . $phone . "?body=" . urlencode($message) : '';
             case 'whatsapp':
-                return "https://wa.me/" . $data['phone'] . "?text=" . urlencode($data['message'] ?? '');
+                $phone = $data['phone'] ?? '';
+                $message = $data['message'] ?? '';
+                return $phone ? "https://wa.me/" . $phone . "?text=" . urlencode($message) : '';
             case 'phone':
-                return "tel:" . $data['content'];
+                return $data['content'] ?? '';
             case 'email':
-                return "mailto:" . $data['email'] . "?subject=" . urlencode($data['subject'] ?? '') . "&body=" . urlencode($data['message'] ?? '');
+                $email = $data['email'] ?? '';
+                $subject = $data['subject'] ?? '';
+                $message = $data['message'] ?? '';
+                return $email ? "mailto:" . $email . "?subject=" . urlencode($subject) . "&body=" . urlencode($message) : '';
             case 'location':
-                return "geo:" . $data['latitude'] . "," . $data['longitude'];
+                $lat = $data['latitude'] ?? '';
+                $lng = $data['longitude'] ?? '';
+                return ($lat && $lng) ? "geo:" . $lat . "," . $lng : '';
             case 'wifi':
-                return "WIFI:T:" . $data['security'] . ";S:" . $data['ssid'] . ";P:" . $data['password'] . ";H:" . ($data['hidden'] ? 'true' : 'false') . ";;";
+                $ssid = $data['ssid'] ?? '';
+                $password = $data['password'] ?? '';
+                $security = $data['security'] ?? 'WPA';
+                $hidden = isset($data['hidden']) && $data['hidden'] ? 'true' : 'false';
+                return $ssid ? "WIFI:T:" . $security . ";S:" . $ssid . ";P:" . $password . ";H:" . $hidden . ";;" : '';
             case 'vcard':
-                return "BEGIN:VCARD\nVERSION:3.0\nFN:" . $data['name'] . "\nORG:" . ($data['organization'] ?? '') . "\nTEL:" . ($data['phone'] ?? '') . "\nEMAIL:" . ($data['email'] ?? '') . "\nURL:" . ($data['website'] ?? '') . "\nEND:VCARD";
+                $name = $data['name'] ?? '';
+                $org = $data['organization'] ?? '';
+                $phone = $data['phone'] ?? '';
+                $email = $data['email'] ?? '';
+                $website = $data['website'] ?? '';
+                return $name ? "BEGIN:VCARD\nVERSION:3.0\nFN:" . $name . "\nORG:" . $org . "\nTEL:" . $phone . "\nEMAIL:" . $email . "\nURL:" . $website . "\nEND:VCARD" : '';
             default:
-                return $data['content'];
+                return $data['content'] ?? '';
         }
     }
 

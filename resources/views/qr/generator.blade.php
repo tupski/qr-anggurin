@@ -326,11 +326,19 @@ function qrGenerator() {
                     const blob = await response.blob();
                     this.qrImage = URL.createObjectURL(blob);
                 } else {
-                    alert('Error generating QR code');
+                    const errorData = await response.json();
+                    console.error('QR Generation Error:', errorData);
+                    // Don't show alert for validation errors, just log them
+                    if (response.status !== 422) {
+                        alert('Error generating QR code: ' + (errorData.error || 'Unknown error'));
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error generating QR code');
+                // Only show alert for network errors, not validation errors
+                if (!error.message.includes('422')) {
+                    alert('Network error. Please check your connection and try again.');
+                }
             } finally {
                 this.loading = false;
             }

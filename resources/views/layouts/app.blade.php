@@ -5,8 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'QR Anggurin - Generator & Scanner QR Code Gratis')</title>
-    <meta name="description" content="Generator dan Scanner QR Code gratis untuk semua. Buat QR Code untuk teks, URL, SMS, WhatsApp, telepon, email, lokasi, WiFi, dan VCard.">
-    
+    <meta name="description" content="@yield('description', 'Generator dan Scanner QR Code gratis untuk semua. Buat QR Code untuk teks, URL, SMS, WhatsApp, telepon, email, lokasi, WiFi, dan VCard.')">
+    <meta name="keywords" content="QR Code, Generator, Scanner, Gratis, Free, QR Code Generator, QR Code Scanner, Indonesia">
+    <meta name="author" content="QR Anggurin">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('title', 'QR Anggurin - Generator & Scanner QR Code Gratis')">
+    <meta property="og:description" content="@yield('description', 'Generator dan Scanner QR Code gratis untuk semua. Buat QR Code untuk teks, URL, SMS, WhatsApp, telepon, email, lokasi, WiFi, dan VCard.')">
+    <meta property="og:image" content="{{ asset('favicon.ico') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ url()->current() }}">
+    <meta property="twitter:title" content="@yield('title', 'QR Anggurin - Generator & Scanner QR Code Gratis')">
+    <meta property="twitter:description" content="@yield('description', 'Generator dan Scanner QR Code gratis untuk semua. Buat QR Code untuk teks, URL, SMS, WhatsApp, telepon, email, lokasi, WiFi, dan VCard.')">
+    <meta property="twitter:image" content="{{ asset('favicon.ico') }}">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ url()->current() }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -19,7 +39,7 @@
                         QR Anggurin
                     </a>
                 </div>
-                
+
                 <nav class="hidden md:flex space-x-8">
                     <a href="{{ url('/') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium {{ request()->is('/') ? 'text-indigo-600 bg-indigo-50' : '' }}">
                         Beranda
