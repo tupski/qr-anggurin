@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
 </p>
 
-QR Anggurin adalah aplikasi web gratis untuk membuat dan memindai QR Code dengan berbagai fitur kustomisasi lengkap. Dibangun dengan Laravel 12.x dan Tailwind CSS untuk pengalaman pengguna yang optimal.
+QR Anggurin adalah aplikasi web gratis untuk membuat dan memindai QR Code dengan berbagai fitur kustomisasi lengkap. Dibangun dengan Laravel 12 dan Tailwind CSS untuk pengalaman pengguna yang optimal.
 
 ## 🚀 Fitur Utama
 
