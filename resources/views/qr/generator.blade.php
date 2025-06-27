@@ -12,7 +12,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" x-data="qrGenerator()" x-init="init()">
             <!-- Left Panel - Form -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
                 <form @submit.prevent="generateQR">
                     <!-- QR Type Selection -->
                     <div class="mb-6">
@@ -145,71 +145,175 @@
                     </div>
 
                     <!-- Customization Options -->
-                    <div class="border-t pt-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Kustomisasi</h3>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Ukuran</label>
-                                <input type="number" x-model="form.size" @input="debouncedGenerate" min="100" max="1000" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div class="border-t border-gray-200 pt-8 mt-8">
+                        <div class="flex items-center mb-6">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
+                                </svg>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Margin</label>
-                                <input type="number" x-model="form.margin" @input="debouncedGenerate" min="0" max="50" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <h3 class="text-xl font-semibold text-gray-900">Kustomisasi QR Code</h3>
+                        </div>
+
+                        <!-- Size and Margin -->
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-gray-700">Ukuran QR Code</label>
+                                <div class="relative">
+                                    <input type="number" x-model="form.size" @input="debouncedGenerate" min="100" max="1000" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 pl-4 pr-12 py-3">
+                                    <span class="absolute right-3 top-3 text-sm text-gray-500">px</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>100px</span>
+                                    <span x-text="form.size + 'px'" class="font-medium text-primary-600"></span>
+                                    <span>1000px</span>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-gray-700">Margin</label>
+                                <div class="relative">
+                                    <input type="number" x-model="form.margin" @input="debouncedGenerate" min="0" max="50" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 pl-4 pr-12 py-3">
+                                    <span class="absolute right-3 top-3 text-sm text-gray-500">px</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>0px</span>
+                                    <span x-text="form.margin + 'px'" class="font-medium text-primary-600"></span>
+                                    <span>50px</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Warna Depan</label>
-                                <input type="color" x-model="form.foreground_color" @change="debouncedGenerate" class="w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <!-- Color Picker -->
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-gray-700">Warna Foreground</label>
+                                <div class="flex items-center space-x-3">
+                                    <div class="relative">
+                                        <input type="color" x-model="form.foreground_color" @change="debouncedGenerate" class="w-16 h-12 rounded-lg border-2 border-gray-300 cursor-pointer shadow-sm">
+                                        <div class="absolute inset-0 rounded-lg border-2 border-gray-300 pointer-events-none"></div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="text" x-model="form.foreground_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 text-sm font-mono">
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Warna Belakang</label>
-                                <input type="color" x-model="form.background_color" @change="debouncedGenerate" class="w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-gray-700">Warna Background</label>
+                                <div class="flex items-center space-x-3">
+                                    <div class="relative">
+                                        <input type="color" x-model="form.background_color" @change="debouncedGenerate" class="w-16 h-12 rounded-lg border-2 border-gray-300 cursor-pointer shadow-sm">
+                                        <div class="absolute inset-0 rounded-lg border-2 border-gray-300 pointer-events-none"></div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="text" x-model="form.background_color" @input="debouncedGenerate" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 text-sm font-mono">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Error Correction</label>
-                            <select x-model="form.error_correction" @change="debouncedGenerate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="L">Low (7%)</option>
-                                <option value="M">Medium (15%)</option>
-                                <option value="Q">Quartile (25%)</option>
-                                <option value="H">High (30%)</option>
-                            </select>
-                        </div>
-
+                        <!-- Error Correction -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Logo</label>
-                            <input type="file" @change="handleLogoUpload" accept="image/*" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Error Correction Level</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button type="button" @click="form.error_correction = 'L'; debouncedGenerate()" :class="form.error_correction === 'L' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                    <div class="font-bold">L</div>
+                                    <div class="text-xs">7%</div>
+                                </button>
+                                <button type="button" @click="form.error_correction = 'M'; debouncedGenerate()" :class="form.error_correction === 'M' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                    <div class="font-bold">M</div>
+                                    <div class="text-xs">15%</div>
+                                </button>
+                                <button type="button" @click="form.error_correction = 'Q'; debouncedGenerate()" :class="form.error_correction === 'Q' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                    <div class="font-bold">Q</div>
+                                    <div class="text-xs">25%</div>
+                                </button>
+                                <button type="button" @click="form.error_correction = 'H'; debouncedGenerate()" :class="form.error_correction === 'H' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="py-3 px-2 rounded-lg text-sm font-medium transition-colors">
+                                    <div class="font-bold">H</div>
+                                    <div class="text-xs">30%</div>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Higher levels provide better error recovery but create denser QR codes</p>
+                        </div>
+
+                        <!-- Logo Upload -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Logo/Branding</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
+                                <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="text-sm text-gray-600 mb-2">Upload logo untuk QR Code</p>
+                                <input type="file" @change="handleLogoUpload" accept="image/*" class="hidden" x-ref="logoInput">
+                                <button type="button" @click="$refs.logoInput.click()" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Pilih File
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2">PNG, JPG, SVG (Max 2MB)</p>
+                            </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200" :disabled="loading">
-                        <span x-show="!loading">Generate QR Code</span>
-                        <span x-show="loading">Generating...</span>
+                    <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" :disabled="loading">
+                        <span x-show="!loading" class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Generate QR Code
+                        </span>
+                        <span x-show="loading" class="flex items-center justify-center">
+                            <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating...
+                        </span>
                     </button>
                 </form>
             </div>
 
             <!-- Right Panel - Preview -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Preview</h3>
-                <div class="flex items-center justify-center min-h-96 bg-gray-50 rounded-lg">
-                    <div x-show="!qrImage" class="text-center text-gray-500">
-                        <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
-                        <p>QR Code akan muncul di sini</p>
                     </div>
-                    <img x-show="qrImage" :src="qrImage" alt="QR Code" class="max-w-full max-h-96">
+                    <h3 class="text-xl font-semibold text-gray-900">Live Preview</h3>
                 </div>
 
-                <div x-show="qrImage" class="mt-4">
-                    <a :href="qrImage" download="qrcode.png" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 block text-center">
+                <div class="flex items-center justify-center min-h-96 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-200">
+                    <div x-show="!qrImage" class="text-center text-gray-500">
+                        <div class="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-lg font-medium">QR Code Preview</p>
+                        <p class="text-sm">QR Code akan muncul di sini secara real-time</p>
+                    </div>
+                    <div x-show="qrImage" class="text-center">
+                        <img :src="qrImage" alt="QR Code" class="max-w-full max-h-80 mx-auto rounded-lg shadow-lg">
+                        <div class="mt-4 text-sm text-gray-600">
+                            <span x-text="form.size + 'x' + form.size + 'px'"></span> •
+                            <span x-text="form.error_correction + ' Error Correction'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="qrImage" class="mt-6 space-y-3">
+                    <a :href="qrImage" download="qrcode.png" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-200 block text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                         Download QR Code
                     </a>
+                    <button @click="navigator.share && navigator.share({title: 'QR Code', files: [new File([qrImage], 'qrcode.png', {type: 'image/png'})]})" x-show="navigator.share" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition duration-200">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                        </svg>
+                        Share QR Code
+                    </button>
                 </div>
             </div>
         </div>
