@@ -80,7 +80,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8" x-data="qrGenerator()" x-init="init()">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" x-data="qrGenerator()" x-init="init()">
             <!-- Floating Preview Button (Mobile Only) -->
             <div class="fixed bottom-6 right-6 z-50 lg:hidden" x-show="qrImage" x-transition>
                 <button @click="scrollToPreview()" class="bg-[#138c79] hover:bg-[#0f7a69] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
@@ -398,7 +398,7 @@
 
                         <!-- Logo Upload -->
                         <!-- TEMPORARILY COMMENTED - LOGO FEATURE UNDER DEVELOPMENT -->
-                        <!--
+
                         <div class="mb-6">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Logo/Branding</label>
 
@@ -506,7 +506,6 @@
                                 <p class="text-xs text-gray-500 mt-2">Logo akan ditempatkan di tengah QR dengan margin yang aman</p>
                             </div>
                         </div>
-                        -->
                                 </div>
                             </div>
 
