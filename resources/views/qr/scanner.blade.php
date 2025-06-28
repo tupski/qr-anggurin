@@ -139,7 +139,9 @@
                         </button>
                     </div>
                     <div class="text-xs text-gray-500">
-                        <p><strong>Format yang didukung:</strong> data:image/[type];base64,[data]</p>
+                        <p><strong>Format yang didukung:</strong></p>
+                        <p>• Dengan prefix: data:image/[type];base64,[data]</p>
+                        <p>• Tanpa prefix: [base64-data-saja]</p>
                         <p><strong>Contoh:</strong> data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...</p>
                     </div>
                 </div>
@@ -362,16 +364,32 @@ function qrScanner() {
         async pasteFromClipboard() {
             try {
                 const text = await navigator.clipboard.readText();
-                if (text.startsWith('data:image/')) {
+                // Accept both data URL format and raw base64
+                if (text.startsWith('data:image/') || this.isValidBase64(text.trim())) {
                     this.base64Data = text;
                     this.result = null;
                     this.error = null;
                 } else {
-                    alert('Clipboard tidak berisi data URL yang valid');
+                    alert('Clipboard tidak berisi data URL atau base64 yang valid');
                 }
             } catch (err) {
                 console.error('Failed to read clipboard:', err);
                 alert('Gagal membaca clipboard. Pastikan browser mendukung clipboard API.');
+            }
+        },
+
+        isValidBase64(str) {
+            try {
+                // Basic base64 validation
+                if (str.length === 0) return false;
+                if (str.length % 4 !== 0) return false;
+                if (!/^[A-Za-z0-9+/]*={0,2}$/.test(str)) return false;
+
+                // Try to decode to see if it's valid
+                const decoded = atob(str);
+                return decoded.length > 0;
+            } catch (e) {
+                return false;
             }
         },
 

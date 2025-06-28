@@ -19,10 +19,7 @@
     border-radius: 0;
 }
 
-.frame-circle .qr-image {
-    border: 8px solid var(--frame-color, #138c79);
-    border-radius: 50%;
-}
+
 
 .frame-rounded .qr-image {
     border: 8px solid var(--frame-color, #138c79);
@@ -30,7 +27,6 @@
 }
 
 .frame-square::before,
-.frame-circle::before,
 .frame-rounded::before {
     content: '';
     position: absolute;
@@ -46,9 +42,7 @@
     border-radius: 0;
 }
 
-.frame-circle::before {
-    border-radius: 50%;
-}
+
 
 .frame-rounded::before {
     border-radius: 2rem;
@@ -401,6 +395,7 @@
                         </div>
 
                         <!-- Logo Upload -->
+                        <!-- TEMPORARILY COMMENTED - LOGO FEATURE UNDER DEVELOPMENT
                         <div class="mb-6">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Logo/Branding</label>
 
@@ -508,6 +503,7 @@
                                 <p class="text-xs text-gray-500 mt-2">Logo akan ditempatkan di tengah QR dengan margin yang aman</p>
                             </div>
                         </div>
+                        END LOGO COMMENT -->
                                 </div>
                             </div>
 
@@ -523,21 +519,16 @@
                                     <!-- Frame Style -->
                                     <div class="mb-6">
                                         <label class="block text-sm font-semibold text-gray-700 mb-3">Style Frame</label>
-                                        <div class="grid grid-cols-2 gap-3">
+                                        <div class="grid grid-cols-3 gap-3">
                                             <button type="button" @click="form.frame_style = 'none'; debouncedGenerate()"
                                                     :class="form.frame_style === 'none' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                                                     class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
-                                                Tanpa Frame
+                                                No Border
                                             </button>
                                             <button type="button" @click="form.frame_style = 'square'; debouncedGenerate()"
                                                     :class="form.frame_style === 'square' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                                                     class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
                                                 Square
-                                            </button>
-                                            <button type="button" @click="form.frame_style = 'circle'; debouncedGenerate()"
-                                                    :class="form.frame_style === 'circle' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                                                    class="p-3 rounded-lg text-sm font-medium transition-colors duration-200">
-                                                Circle
                                             </button>
                                             <button type="button" @click="form.frame_style = 'rounded'; debouncedGenerate()"
                                                     :class="form.frame_style === 'rounded' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
@@ -724,7 +715,6 @@
                         <div class="qr-container inline-block"
                              :class="{
                                  'frame-square': form.frame_style === 'square',
-                                 'frame-circle': form.frame_style === 'circle',
                                  'frame-rounded': form.frame_style === 'rounded'
                              }"
                              :style="form.frame_style !== 'none' ? `--frame-color: ${form.frame_color}` : ''">

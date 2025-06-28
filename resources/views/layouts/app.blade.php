@@ -30,31 +30,69 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
+    <!-- Modern Header -->
+    <header class="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <a href="{{ url('/') }}" class="text-2xl font-bold text-[#138c79]">
-                        QR Anggurin
-                    </a>
+            <div class="flex justify-between items-center h-16 lg:h-20">
+                <!-- Logo Section -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <!-- QR Icon -->
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-[#138c79] to-[#0f7a69] rounded-xl flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 lg:w-7 lg:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                            </svg>
+                        </div>
+                        <!-- Brand Text -->
+                        <div class="flex flex-col">
+                            <a href="{{ url('/') }}" class="text-xl lg:text-2xl font-bold text-gray-900 hover:text-[#138c79] transition-colors duration-200">
+                                QR Anggurin
+                            </a>
+                            <span class="text-xs text-gray-500 font-medium hidden sm:block">QR Code Generator & Scanner</span>
+                        </div>
+                    </div>
                 </div>
 
-                <nav class="hidden md:flex space-x-8">
-                    <a href="{{ url('/') }}" class="text-gray-700 hover:text-[#138c79] px-3 py-2 rounded-md text-sm font-medium {{ request()->is('/') ? 'text-[#138c79] bg-[#138c79]/10' : '' }}">
-                        Beranda
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex items-center space-x-1">
+                    <a href="{{ url('/') }}" class="group relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->is('/') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-700 hover:text-[#138c79] hover:bg-gray-100' }}">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span>Beranda</span>
+                        </div>
+                        @if(request()->is('/'))
+                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-[#138c79] rounded-full"></div>
+                        @endif
                     </a>
-                    <a href="{{ route('qr.generator') }}" class="text-gray-700 hover:text-[#138c79] px-3 py-2 rounded-md text-sm font-medium {{ request()->is('generator') ? 'text-[#138c79] bg-[#138c79]/10' : '' }}">
-                        Bikin QR
+                    <a href="{{ route('qr.generator') }}" class="group relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->is('generator') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-700 hover:text-[#138c79] hover:bg-gray-100' }}">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span>Bikin QR</span>
+                        </div>
+                        @if(request()->is('generator'))
+                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-[#138c79] rounded-full"></div>
+                        @endif
                     </a>
-                    <a href="{{ route('qr.scanner') }}" class="text-gray-700 hover:text-[#138c79] px-3 py-2 rounded-md text-sm font-medium {{ request()->is('scanner') ? 'text-[#138c79] bg-[#138c79]/10' : '' }}">
-                        Scan QR
+                    <a href="{{ route('qr.scanner') }}" class="group relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->is('scanner') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-700 hover:text-[#138c79] hover:bg-gray-100' }}">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Scan QR</span>
+                        </div>
+                        @if(request()->is('scanner'))
+                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-[#138c79] rounded-full"></div>
+                        @endif
                     </a>
                 </nav>
 
-                <!-- Mobile menu button -->
-                <div class="md:hidden" x-data="{ mobileMenuOpen: false }">
-                    <button type="button" class="text-gray-700 hover:text-[#138c79] relative z-50" @click="mobileMenuOpen = !mobileMenuOpen">
+                <!-- Mobile & Tablet Menu Button -->
+                <div class="lg:hidden" x-data="{ mobileMenuOpen: false }">
+                    <button type="button" class="p-2 rounded-xl text-gray-700 hover:text-[#138c79] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#138c79]/20 transition-all duration-200 relative z-50" @click="mobileMenuOpen = !mobileMenuOpen">
                         <svg class="h-6 w-6 transition-transform duration-300" :class="mobileMenuOpen ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-show="!mobileMenuOpen">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>

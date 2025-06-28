@@ -17,7 +17,7 @@ class QRScannerController extends Controller
         try {
             $request->validate([
                 'method' => 'required|in:upload,url,camera,base64',
-                'file' => 'required_if:method,upload|file|max:10240|mimes:jpeg,jpg,png,gif,bmp,svg,webp',
+                'file' => 'required_if:method,upload|file|max:10240',
                 'url' => 'required_if:method,url|url',
                 'base64' => 'required_if:method,base64|string',
             ]);
@@ -71,16 +71,33 @@ class QRScannerController extends Controller
                 file_put_contents(storage_path('app/public/' . $imagePath), $imageContent);
                 $fullPath = storage_path('app/public/' . $imagePath);
             } elseif ($request->method === 'base64') {
-                // Handle base64 data URL
-                $base64Data = $request->base64;
+                // Handle base64 data URL or raw base64
+                $base64Data = trim($request->base64);
 
-                // Parse data URL format: data:image/type;base64,actualdata
-                if (!preg_match('/^data:image\/([a-zA-Z0-9+\/]+);base64,(.+)$/', $base64Data, $matches)) {
-                    throw new \Exception('Invalid base64 data URL format');
+                $imageContent = null;
+                $extension = 'png'; // Default extension
+
+                // Check if it's a data URL format: data:image/type;base64,actualdata
+                if (preg_match('/^data:image\/([a-zA-Z0-9+\/]+);base64,(.+)$/', $base64Data, $matches)) {
+                    $imageType = $matches[1];
+                    $base64Content = $matches[2];
+
+                    // Map image type to extension
+                    $extension = match($imageType) {
+                        'jpeg', 'jpg' => 'jpg',
+                        'png' => 'png',
+                        'gif' => 'gif',
+                        'svg+xml' => 'svg',
+                        'bmp' => 'bmp',
+                        'webp' => 'webp',
+                        'tiff' => 'tiff',
+                        'ico' => 'ico',
+                        default => 'png'
+                    };
+                } else {
+                    // Assume it's raw base64 data
+                    $base64Content = $base64Data;
                 }
-
-                $imageType = $matches[1];
-                $base64Content = $matches[2];
 
                 // Decode base64 content
                 $imageContent = base64_decode($base64Content);
@@ -88,16 +105,22 @@ class QRScannerController extends Controller
                     throw new \Exception('Failed to decode base64 content');
                 }
 
-                // Map image type to extension
-                $extension = match($imageType) {
-                    'jpeg', 'jpg' => 'jpg',
-                    'png' => 'png',
-                    'gif' => 'gif',
-                    'svg+xml' => 'svg',
-                    'bmp' => 'bmp',
-                    'webp' => 'webp',
-                    default => 'png'
-                };
+                // Try to detect image type from content if not from data URL
+                if (!isset($imageType)) {
+                    $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->buffer($imageContent);
+                    $extension = match($mimeType) {
+                        'image/jpeg' => 'jpg',
+                        'image/png' => 'png',
+                        'image/gif' => 'gif',
+                        'image/svg+xml' => 'svg',
+                        'image/bmp' => 'bmp',
+                        'image/webp' => 'webp',
+                        'image/tiff' => 'tiff',
+                        'image/x-icon' => 'ico',
+                        default => 'png'
+                    };
+                }
 
                 $imagePath = 'temp/' . uniqid() . '.' . $extension;
                 file_put_contents(storage_path('app/public/' . $imagePath), $imageContent);

@@ -304,6 +304,8 @@ class QRCodeController extends Controller
                 'logoType' => 'nullable|in:none,default,upload',
                 'defaultLogo' => 'nullable|string',
                 'logoSize' => 'nullable|integer|min:10|max:30',
+                'frame_style' => 'nullable|in:none,square,rounded',
+                'frame_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
                 // Additional validations for specific types
                 'phone' => 'required_if:type,sms,whatsapp,phone|nullable|string|max:20',
                 'email' => 'required_if:type,email|nullable|email|max:255',
@@ -418,7 +420,13 @@ class QRCodeController extends Controller
                     ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             }
 
-            return response($result->getString())
+            // Apply frame if specified
+            $finalImage = $result->getString();
+            if ($request->frame_style && $request->frame_style !== 'none') {
+                $finalImage = $this->applyFrame($result->getString(), $request->frame_style, $request->frame_color ?? '#138c79', $request->format);
+            }
+
+            return response($finalImage)
                 ->header('Content-Type', $mimeTypes[$request->format])
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
@@ -427,5 +435,122 @@ class QRCodeController extends Controller
                 'error' => 'Failed to download QR code: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    private function applyFrame($imageData, $frameStyle, $frameColor, $format)
+    {
+        try {
+            // Create image from QR data
+            $qrImage = imagecreatefromstring($imageData);
+            if (!$qrImage) {
+                return $imageData; // Return original if can't process
+            }
+
+            $qrWidth = imagesx($qrImage);
+            $qrHeight = imagesy($qrImage);
+
+            // Frame thickness
+            $frameThickness = max(8, intval($qrWidth * 0.03)); // 3% of QR width, minimum 8px
+
+            // Create new image with frame
+            $newWidth = $qrWidth + ($frameThickness * 2);
+            $newHeight = $qrHeight + ($frameThickness * 2);
+
+            $framedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+            // Parse frame color
+            $frameColorRgb = $this->hexToRgb($frameColor);
+            $frameColorGd = imagecolorallocate($framedImage, $frameColorRgb['r'], $frameColorRgb['g'], $frameColorRgb['b']);
+
+            // Fill with frame color
+            imagefill($framedImage, 0, 0, $frameColorGd);
+
+            // Copy QR image to center
+            imagecopy($framedImage, $qrImage, $frameThickness, $frameThickness, 0, 0, $qrWidth, $qrHeight);
+
+            // Apply frame style
+            if ($frameStyle === 'rounded') {
+                $framedImage = $this->applyRoundedCorners($framedImage, $newWidth, $newHeight, intval($frameThickness * 1.5));
+            }
+
+            // Output based on format
+            ob_start();
+            switch ($format) {
+                case 'png':
+                    imagepng($framedImage);
+                    break;
+                case 'jpg':
+                case 'jpeg':
+                    imagejpeg($framedImage, null, 90);
+                    break;
+                case 'webp':
+                    imagewebp($framedImage);
+                    break;
+                default:
+                    imagepng($framedImage);
+            }
+            $result = ob_get_contents();
+            ob_end_clean();
+
+            // Clean up
+            imagedestroy($qrImage);
+            imagedestroy($framedImage);
+
+            return $result;
+
+        } catch (\Exception $e) {
+            // Return original image if frame application fails
+            return $imageData;
+        }
+    }
+
+
+
+    private function applyRoundedCorners($image, $width, $height, $radius)
+    {
+        $rounded = imagecreatetruecolor($width, $height);
+
+        // Enable alpha blending
+        imagealphablending($rounded, false);
+        imagesavealpha($rounded, true);
+
+        // Fill with transparent
+        $transparent = imagecolorallocatealpha($rounded, 0, 0, 0, 127);
+        imagefill($rounded, 0, 0, $transparent);
+
+        // Create rounded mask
+        $mask = imagecreatetruecolor($width, $height);
+        imagealphablending($mask, false);
+        imagesavealpha($mask, true);
+
+        $maskTransparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
+        $maskOpaque = imagecolorallocate($mask, 0, 0, 0);
+
+        imagefill($mask, 0, 0, $maskTransparent);
+
+        // Draw rounded rectangle
+        imagefilledrectangle($mask, $radius, 0, $width - $radius, $height, $maskOpaque);
+        imagefilledrectangle($mask, 0, $radius, $width, $height - $radius, $maskOpaque);
+
+        // Draw corners
+        imagefilledellipse($mask, $radius, $radius, $radius * 2, $radius * 2, $maskOpaque);
+        imagefilledellipse($mask, $width - $radius, $radius, $radius * 2, $radius * 2, $maskOpaque);
+        imagefilledellipse($mask, $radius, $height - $radius, $radius * 2, $radius * 2, $maskOpaque);
+        imagefilledellipse($mask, $width - $radius, $height - $radius, $radius * 2, $radius * 2, $maskOpaque);
+
+        // Apply mask to original image
+        for ($x = 0; $x < $width; $x++) {
+            for ($y = 0; $y < $height; $y++) {
+                $maskPixel = imagecolorat($mask, $x, $y);
+                if (($maskPixel & 0xFF000000) >> 24 == 0) { // Not transparent in mask
+                    $originalPixel = imagecolorat($image, $x, $y);
+                    imagesetpixel($rounded, $x, $y, $originalPixel);
+                }
+            }
+        }
+
+        imagedestroy($mask);
+
+        return $rounded;
     }
 }
