@@ -102,7 +102,7 @@
                     </button>
 
                     <!-- Mobile menu fullscreen -->
-                    <div class="fixed inset-0 bg-gradient-to-br from-[#138c79] to-[#0f7a69] z-50 min-h-screen"
+                    <div class="fixed inset-0 bg-gradient-to-br from-[#138c79] to-[#0f7a69] z-50"
                          x-show="mobileMenuOpen"
                          x-transition:enter="transition ease-out duration-300"
                          x-transition:enter-start="opacity-0"
@@ -114,69 +114,69 @@
 
                         <!-- Close Button -->
                         <div class="absolute top-6 right-6 z-[70]">
-                            <button @click="mobileMenuOpen = false" class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 shadow-lg">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button @click="mobileMenuOpen = false" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
                         </div>
 
                         <!-- Content Container -->
-                        <div class="flex flex-col justify-between min-h-screen py-16 px-8">
+                        <div class="flex flex-col h-screen">
                             <!-- Logo dan Brand - Bagian Atas -->
-                            <div class="text-center">
-                                <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="text-center pt-20 pb-8">
+                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
                                     </svg>
                                 </div>
-                                <h2 class="text-4xl font-bold text-white mb-2">QR Anggurin</h2>
-                                <p class="text-white/80 text-lg">Generator & Scanner QR Code</p>
+                                <h2 class="text-3xl font-bold text-white mb-2">QR Anggurin</h2>
+                                <p class="text-white/80 text-base">Generator & Scanner QR Code</p>
                             </div>
 
                             <!-- Menu Navigation - Bagian Tengah -->
-                            <div class="flex-1 flex items-center justify-center">
-                                <nav class="space-y-5 w-full max-w-xs">
+                            <div class="flex-1 flex items-center justify-center px-8">
+                                <nav class="space-y-4 w-full max-w-sm">
                                     <a href="{{ url('/') }}"
-                                       class="block w-full text-white hover:text-white/90 transition-all duration-300 transform hover:scale-105 {{ request()->is('/') ? 'text-white/90' : '' }}"
+                                       class="block w-full text-white hover:text-white/90 transition-all duration-300"
                                        @click="mobileMenuOpen = false">
-                                        <div class="flex items-center justify-center space-x-4 bg-white/15 backdrop-blur-sm rounded-2xl py-5 px-6 hover:bg-white/25 transition-all duration-300 shadow-lg">
-                                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex items-center space-x-4 bg-white/15 backdrop-blur-sm rounded-xl py-4 px-6 hover:bg-white/25 transition-all duration-300">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                                             </svg>
-                                            <span class="text-xl font-bold">Beranda</span>
+                                            <span class="text-lg font-semibold">Beranda</span>
                                         </div>
                                     </a>
 
                                     <a href="{{ route('qr.generator') }}"
-                                       class="block w-full text-white hover:text-white/90 transition-all duration-300 transform hover:scale-105 {{ request()->is('bikin-qr') ? 'text-white/90' : '' }}"
+                                       class="block w-full text-white hover:text-white/90 transition-all duration-300"
                                        @click="mobileMenuOpen = false">
-                                        <div class="flex items-center justify-center space-x-4 bg-white/15 backdrop-blur-sm rounded-2xl py-5 px-6 hover:bg-white/25 transition-all duration-300 shadow-lg">
-                                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex items-center space-x-4 bg-white/15 backdrop-blur-sm rounded-xl py-4 px-6 hover:bg-white/25 transition-all duration-300">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
                                             </svg>
-                                            <span class="text-xl font-bold">Bikin QR</span>
+                                            <span class="text-lg font-semibold">Bikin QR</span>
                                         </div>
                                     </a>
 
                                     <a href="{{ route('qr.scanner') }}"
-                                       class="block w-full text-white hover:text-white/90 transition-all duration-300 transform hover:scale-105 {{ request()->is('scan-qr') ? 'text-white/90' : '' }}"
+                                       class="block w-full text-white hover:text-white/90 transition-all duration-300"
                                        @click="mobileMenuOpen = false">
-                                        <div class="flex items-center justify-center space-x-4 bg-white/15 backdrop-blur-sm rounded-2xl py-5 px-6 hover:bg-white/25 transition-all duration-300 shadow-lg">
-                                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex items-center space-x-4 bg-white/15 backdrop-blur-sm rounded-xl py-4 px-6 hover:bg-white/25 transition-all duration-300">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                             </svg>
-                                            <span class="text-xl font-bold">Scan QR</span>
+                                            <span class="text-lg font-semibold">Scan QR</span>
                                         </div>
                                     </a>
                                 </nav>
                             </div>
 
                             <!-- Footer - Bagian Bawah -->
-                            <div class="text-center">
+                            <div class="text-center pb-8 px-8">
                                 <div class="border-t border-white/30 pt-6">
-                                    <p class="text-white/80 text-base font-medium">© {{ date('Y') }} QR Anggurin</p>
-                                    <p class="text-white/60 text-sm mt-1">Developed by Angga Artupas</p>
+                                    <p class="text-white/80 text-sm font-medium">© {{ date('Y') }} QR Anggurin</p>
+                                    <p class="text-white/60 text-xs mt-1">Developed by Angga Artupas</p>
                                 </div>
                             </div>
                         </div>
@@ -308,45 +308,30 @@
     </footer>
 
     <!-- Mobile Floating Footer Menu -->
-    <div class="fixed bottom-4 left-4 right-4 md:hidden z-50">
-        <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50">
-            <div class="flex justify-around items-center py-3 px-2">
+    <div class="fixed bottom-6 left-6 right-6 md:hidden z-40">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200">
+            <div class="flex justify-around items-center py-2">
                 <!-- Beranda -->
-                <a href="{{ url('/') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-300 {{ request()->is('/') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-600 hover:text-[#138c79] hover:bg-gray-100' }}">
-                    <div class="relative">
-                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        @if(request()->is('/'))
-                        <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#138c79] rounded-full"></div>
-                        @endif
-                    </div>
+                <a href="{{ url('/') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 {{ request()->is('/') ? 'text-[#138c79]' : 'text-gray-600' }}">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
                     <span class="text-xs font-medium">Beranda</span>
                 </a>
 
                 <!-- Buat QR -->
-                <a href="{{ route('qr.generator') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-300 {{ request()->is('bikin-qr') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-600 hover:text-[#138c79] hover:bg-gray-100' }}">
-                    <div class="relative">
-                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                        </svg>
-                        @if(request()->is('bikin-qr'))
-                        <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#138c79] rounded-full"></div>
-                        @endif
-                    </div>
+                <a href="{{ route('qr.generator') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 {{ request()->routeIs('qr.generator') ? 'text-[#138c79]' : 'text-gray-600' }}">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                    </svg>
                     <span class="text-xs font-medium">Buat QR</span>
                 </a>
 
                 <!-- Scan QR -->
-                <a href="{{ route('qr.scanner') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-300 {{ request()->is('scan-qr') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-600 hover:text-[#138c79] hover:bg-gray-100' }}">
-                    <div class="relative">
-                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        @if(request()->is('scan-qr'))
-                        <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#138c79] rounded-full"></div>
-                        @endif
-                    </div>
+                <a href="{{ route('qr.scanner') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 {{ request()->routeIs('qr.scanner') ? 'text-[#138c79]' : 'text-gray-600' }}">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                     <span class="text-xs font-medium">Scan QR</span>
                 </a>
             </div>
