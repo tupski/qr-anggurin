@@ -16,38 +16,38 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-4">Scanner QR Code</h1>
-            <p class="text-lg text-gray-600">Scan QR Code dengan upload file, URL, atau kamera</p>
+            <p class="text-lg text-gray-600">Scan QR Code dengan upload file, URL, kamera, atau base64</p>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg p-6" x-data="qrScanner()">
             <!-- Method Selection -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Metode Scan</label>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button @click="method = 'upload'" :class="method === 'upload' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
-                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                    <button @click="method = 'upload'" :class="method === 'upload' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-3 lg:p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
+                        <svg class="w-6 h-6 lg:w-8 lg:h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
-                        Upload File
+                        <span class="text-sm lg:text-base">Upload File</span>
                     </button>
-                    <button @click="method = 'url'" :class="method === 'url' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
-                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button @click="method = 'url'" :class="method === 'url' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-3 lg:p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
+                        <svg class="w-6 h-6 lg:w-8 lg:h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                         </svg>
-                        URL Gambar
+                        <span class="text-sm lg:text-base">URL Gambar</span>
                     </button>
-                    <button @click="method = 'camera'" :class="method === 'camera' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
-                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button @click="method = 'camera'" :class="method === 'camera' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-3 lg:p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
+                        <svg class="w-6 h-6 lg:w-8 lg:h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        Kamera
+                        <span class="text-sm lg:text-base">Kamera</span>
                     </button>
-                    <button @click="method = 'base64'" :class="method === 'base64' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
-                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button @click="method = 'base64'" :class="method === 'base64' ? 'bg-[#138c79] text-white' : 'bg-gray-100 text-gray-700'" class="p-3 lg:p-4 rounded-lg border-2 border-transparent hover:border-[#138c79]/30 transition duration-200">
+                        <svg class="w-6 h-6 lg:w-8 lg:h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        Base64
+                        <span class="text-sm lg:text-base">Base64</span>
                     </button>
                 </div>
             </div>
