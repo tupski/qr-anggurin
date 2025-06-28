@@ -76,20 +76,36 @@
         display: flex;
         gap: 2rem;
         align-items: flex-start;
+        min-height: calc(100vh - 12rem);
     }
 
     .form-panel {
         flex: 1;
         width: 50%;
+        min-width: 0; /* Prevent flex item from overflowing */
     }
 
     .preview-panel {
         flex: 1;
         width: 50%;
+        min-width: 0; /* Prevent flex item from overflowing */
         position: sticky;
         top: 2rem;
         max-height: calc(100vh - 4rem);
         overflow-y: auto;
+        align-self: flex-start;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1023px) {
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .form-panel,
+    .preview-panel {
+        width: 100%;
     }
 }
 </style>
@@ -103,7 +119,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex flex-col lg:flex-row gap-8 main-layout" x-data="qrGenerator()" x-init="init()">
+        <div class="main-layout" x-data="qrGenerator()" x-init="init()">
             <!-- Floating Preview Button (Mobile Only) -->
             <div class="fixed bottom-6 right-6 z-50 lg:hidden" x-show="qrImage" x-transition>
                 <button @click="scrollToPreview()" class="bg-[#138c79] hover:bg-[#0f7a69] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
@@ -115,7 +131,7 @@
             </div>
 
             <!-- Left Panel - Form (50% width) -->
-            <div class="w-full lg:w-1/2 bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100 form-panel">
+            <div class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100 form-panel">
                 <form @submit.prevent="generateQR">
                     <!-- QR Type Selection -->
                     <div class="mb-8">
@@ -692,7 +708,7 @@
             </div>
 
             <!-- Right Panel - Preview (50% width, sticky) -->
-            <div id="preview-section" class="w-full lg:w-1/2 bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100 lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto preview-panel">
+            <div id="preview-section" class="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100 preview-panel">
                 <div class="flex items-center mb-6">
                     <div class="w-8 h-8 bg-[#138c79]/10 rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5 text-[#138c79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
