@@ -28,8 +28,152 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Alpine.js CDN as backup -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Alpine.js cloak style -->
+    <style>
+        [x-cloak] { display: none !important; }
+        .mobile-menu-show { display: block !important; }
+        .mobile-menu-hide { display: none !important; }
+
+        /* Mobile menu animations */
+        #mobile-menu {
+            background: linear-gradient(135deg, #138c79 0%, #0f7a69 100%) !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 50 !important;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #mobile-menu.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Hamburger lines styling */
+        .hamburger-line {
+            background-color: #374151 !important;
+            height: 2px !important;
+            width: 20px !important;
+            display: block !important;
+            margin: 3px 0 !important;
+        }
+
+        /* Hamburger to X animation */
+        .menu-open .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+            background-color: #138c79 !important;
+        }
+
+        .menu-open .hamburger-line:nth-child(2) {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .menu-open .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+            background-color: #138c79 !important;
+        }
+
+        .menu-open .circle-border {
+            opacity: 1;
+            scale: 1;
+            border-color: #138c79 !important;
+        }
+
+        /* Force bottom menu visibility */
+        #bottom-menu {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            bottom: 1rem !important;
+            left: 1rem !important;
+            right: 1rem !important;
+            z-index: 50 !important;
+        }
+
+        @media (min-width: 768px) {
+            #bottom-menu {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const closeButton = document.getElementById('mobile-menu-close');
+            let isMenuOpen = false;
+
+            function openMenu() {
+                mobileMenu.style.display = 'block';
+                setTimeout(() => {
+                    mobileMenu.classList.add('show');
+                }, 10);
+                menuButton.classList.add('menu-open');
+                isMenuOpen = true;
+            }
+
+            function closeMenu() {
+                mobileMenu.classList.remove('show');
+                menuButton.classList.remove('menu-open');
+                setTimeout(() => {
+                    mobileMenu.style.display = 'none';
+                }, 300);
+                isMenuOpen = false;
+            }
+
+            if (menuButton && mobileMenu) {
+                // Add click handler to menu button
+                menuButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (isMenuOpen) {
+                        closeMenu();
+                    } else {
+                        openMenu();
+                    }
+                });
+
+                // Add click handler to close button
+                if (closeButton) {
+                    closeButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        closeMenu();
+                    });
+                }
+
+                // Add click handlers to menu links
+                const menuLinks = mobileMenu.querySelectorAll('a');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        closeMenu();
+                    });
+                });
+            }
+
+            // Ensure bottom menu visibility
+            const bottomMenu = document.getElementById('bottom-menu');
+            if (bottomMenu) {
+                bottomMenu.style.display = 'block';
+                bottomMenu.style.visibility = 'visible';
+                bottomMenu.style.opacity = '1';
+            }
+        });
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen" x-data="{ mobileMenuOpen: false }">
     <!-- Modern Header -->
     <header class="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,95 +234,98 @@
                     </a>
                 </nav>
 
-                <!-- Mobile & Tablet Menu Button -->
-                <div class="lg:hidden" x-data="{ mobileMenuOpen: false }">
-                    <button type="button" class="p-2 rounded-xl text-gray-700 hover:text-[#138c79] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#138c79]/20 transition-all duration-200 relative z-[60]" @click="mobileMenuOpen = !mobileMenuOpen">
-                        <svg class="h-6 w-6 transition-transform duration-300" :class="mobileMenuOpen ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-show="!mobileMenuOpen">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="h-6 w-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-show="mobileMenuOpen">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                <!-- Mobile Menu Button -->
+                <div class="lg:hidden">
+                    <button type="button" id="mobile-menu-button" class="relative p-3 rounded-xl text-gray-700 hover:text-[#138c79] hover:bg-gray-100 focus:outline-none transition-all duration-300" @click="mobileMenuOpen = !mobileMenuOpen">
+                        <!-- Hamburger Icon -->
+                        <div class="hamburger-icon w-6 h-6 flex flex-col justify-center items-center transition-all duration-300">
+                            <span class="hamburger-line block w-5 h-0.5 bg-gray-700 transition-all duration-300 transform origin-center" style="background-color: #374151 !important;"></span>
+                            <span class="hamburger-line block w-5 h-0.5 bg-gray-700 mt-1.5 transition-all duration-300 transform origin-center" style="background-color: #374151 !important;"></span>
+                            <span class="hamburger-line block w-5 h-0.5 bg-gray-700 mt-1.5 transition-all duration-300 transform origin-center" style="background-color: #374151 !important;"></span>
+                        </div>
+                        <!-- Circle Border (hidden initially) -->
+                        <div class="circle-border absolute inset-0 rounded-full border-2 border-gray-700 opacity-0 scale-75 transition-all duration-300" style="border-color: #374151 !important;"></div>
                     </button>
 
-                    <!-- Mobile menu fullscreen -->
-                    <div class="fixed inset-0 bg-gradient-to-br from-[#138c79] to-[#0f7a69] z-50"
+                    <!-- Fullscreen Mobile Menu -->
+                    <div id="mobile-menu" class="fixed inset-0 z-50 bg-gradient-to-br from-[#138c79] to-[#0f7a69]"
+                         style="background: linear-gradient(135deg, #138c79 0%, #0f7a69 100%) !important; display: none; width: 100vw; height: 100vh; top: 0; left: 0; right: 0; bottom: 0;"
                          x-show="mobileMenuOpen"
                          x-transition:enter="transition ease-out duration-300"
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
                          x-transition:leave="transition ease-in duration-200"
                          x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0"
-                         style="display: none;">
+                         x-transition:leave-end="opacity-0">
 
                         <!-- Close Button -->
-                        <div class="absolute top-6 right-6 z-[70]">
-                            <button @click="mobileMenuOpen = false" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
+                        <button id="mobile-menu-close" @click="mobileMenuOpen = false"
+                                class="absolute top-16 right-6 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 border-2 border-white/30">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
 
-                        <!-- Content Container -->
-                        <div class="flex flex-col h-screen">
-                            <!-- Logo dan Brand - Bagian Atas -->
-                            <div class="text-center pt-20 pb-8">
-                                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- Menu Content -->
+                        <div class="flex flex-col h-full">
+                            <!-- Top Section: Logo & Slogan -->
+                            <div class="flex flex-col items-center justify-center pt-32 pb-8">
+                                <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 shadow-xl border border-white/30">
+                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
                                     </svg>
                                 </div>
-                                <h2 class="text-3xl font-bold text-white mb-2">QR Anggurin</h2>
-                                <p class="text-white/80 text-base">Generator & Scanner QR Code</p>
+                                <h1 class="text-3xl font-bold text-white mb-2">QR Anggurin</h1>
+                                <p class="text-white/80 text-center px-8">Generator & Scanner QR Code gratis untuk semua</p>
                             </div>
 
-                            <!-- Menu Navigation - Bagian Tengah -->
-                            <div class="flex-1 flex items-center justify-center px-8">
-                                <nav class="space-y-4 w-full max-w-sm">
-                                    <a href="{{ url('/') }}"
-                                       class="block w-full text-white hover:text-white/90 transition-all duration-300"
-                                       @click="mobileMenuOpen = false">
-                                        <div class="flex items-center space-x-4 bg-white/15 backdrop-blur-sm rounded-xl py-4 px-6 hover:bg-white/25 transition-all duration-300">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                                            </svg>
-                                            <span class="text-lg font-semibold">Beranda</span>
-                                        </div>
-                                    </a>
+                            <!-- Center Section: Menu Items -->
+                            <div class="flex-1 flex flex-col justify-center px-8 space-y-4">
+                                <a href="{{ url('/') }}" @click="mobileMenuOpen = false"
+                                   class="flex items-center space-x-4 p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-300">
+                                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-lg">Beranda</div>
+                                        <div class="text-sm text-white/70">Halaman utama</div>
+                                    </div>
+                                </a>
 
-                                    <a href="{{ route('qr.generator') }}"
-                                       class="block w-full text-white hover:text-white/90 transition-all duration-300"
-                                       @click="mobileMenuOpen = false">
-                                        <div class="flex items-center space-x-4 bg-white/15 backdrop-blur-sm rounded-xl py-4 px-6 hover:bg-white/25 transition-all duration-300">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                                            </svg>
-                                            <span class="text-lg font-semibold">Bikin QR</span>
-                                        </div>
-                                    </a>
+                                <a href="{{ route('qr.generator') }}" @click="mobileMenuOpen = false"
+                                   class="flex items-center space-x-4 p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-300">
+                                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-lg">Bikin QR</div>
+                                        <div class="text-sm text-white/70">Buat QR Code baru</div>
+                                    </div>
+                                </a>
 
-                                    <a href="{{ route('qr.scanner') }}"
-                                       class="block w-full text-white hover:text-white/90 transition-all duration-300"
-                                       @click="mobileMenuOpen = false">
-                                        <div class="flex items-center space-x-4 bg-white/15 backdrop-blur-sm rounded-xl py-4 px-6 hover:bg-white/25 transition-all duration-300">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                            </svg>
-                                            <span class="text-lg font-semibold">Scan QR</span>
-                                        </div>
-                                    </a>
-                                </nav>
+                                <a href="{{ route('qr.scanner') }}" @click="mobileMenuOpen = false"
+                                   class="flex items-center space-x-4 p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-300">
+                                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-lg">Scan QR</div>
+                                        <div class="text-sm text-white/70">Pindai QR Code</div>
+                                    </div>
+                                </a>
                             </div>
 
-                            <!-- Footer - Bagian Bawah -->
-                            <div class="text-center pb-8 px-8">
-                                <div class="border-t border-white/30 pt-6">
-                                    <p class="text-white/80 text-sm font-medium">© {{ date('Y') }} QR Anggurin</p>
-                                    <p class="text-white/60 text-xs mt-1">Developed by Angga Artupas</p>
-                                </div>
-                            </div>
+                            <!-- Bottom Section: Copyright -->
+                            {{-- <div class="absolute bottom-20 left-0 right-0 text-center px-6">
+                                <p class="text-white/60 text-sm">Hak Cipta © {{ date('Y') }} QR Anggurin. Semua hak cipta dilindungi.</p>
+                                <p class="text-white/50 text-xs mt-1">Developed by Angga Artupas</p>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -307,31 +454,46 @@
         </div>
     </footer>
 
-    <!-- Mobile Floating Footer Menu -->
-    <div class="fixed bottom-6 left-6 right-6 md:hidden z-40">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-200">
-            <div class="flex justify-around items-center py-2">
+    <!-- Mobile Floating Bottom Menu -->
+    <div id="bottom-menu" class="fixed bottom-4 left-4 right-4 md:hidden z-50" style="display: block !important;">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200" style="background-color: white !important; min-height: 70px;">
+            <div class="flex justify-around items-center py-3 px-2">
                 <!-- Beranda -->
-                <a href="{{ url('/') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 {{ request()->is('/') ? 'text-[#138c79]' : 'text-gray-600' }}">
-                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
+                <a href="{{ url('/') }}" class="flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 {{ request()->is('/') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-600 hover:text-[#138c79] hover:bg-gray-50' }}">
+                    <div class="relative">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        @if(request()->is('/'))
+                        <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#138c79] rounded-full"></div>
+                        @endif
+                    </div>
                     <span class="text-xs font-medium">Beranda</span>
                 </a>
 
-                <!-- Buat QR -->
-                <a href="{{ route('qr.generator') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 {{ request()->routeIs('qr.generator') ? 'text-[#138c79]' : 'text-gray-600' }}">
-                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                    </svg>
-                    <span class="text-xs font-medium">Buat QR</span>
+                <!-- Bikin QR -->
+                <a href="{{ route('qr.generator') }}" class="flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 {{ request()->routeIs('qr.generator') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-600 hover:text-[#138c79] hover:bg-gray-50' }}">
+                    <div class="relative">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        @if(request()->routeIs('qr.generator'))
+                        <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#138c79] rounded-full"></div>
+                        @endif
+                    </div>
+                    <span class="text-xs font-medium">Bikin QR</span>
                 </a>
 
                 <!-- Scan QR -->
-                <a href="{{ route('qr.scanner') }}" class="flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-200 {{ request()->routeIs('qr.scanner') ? 'text-[#138c79]' : 'text-gray-600' }}">
-                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+                <a href="{{ route('qr.scanner') }}" class="flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 {{ request()->routeIs('qr.scanner') ? 'text-[#138c79] bg-[#138c79]/10' : 'text-gray-600 hover:text-[#138c79] hover:bg-gray-50' }}">
+                    <div class="relative">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        @if(request()->routeIs('qr.scanner'))
+                        <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#138c79] rounded-full"></div>
+                        @endif
+                    </div>
                     <span class="text-xs font-medium">Scan QR</span>
                 </a>
             </div>
