@@ -395,7 +395,8 @@
                         </div>
 
                         <!-- Logo Upload -->
-                        <!-- TEMPORARILY COMMENTED - LOGO FEATURE UNDER DEVELOPMENT
+                        <!-- TEMPORARILY COMMENTED - LOGO FEATURE UNDER DEVELOPMENT -->
+                        <!--
                         <div class="mb-6">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Logo/Branding</label>
 
@@ -503,7 +504,7 @@
                                 <p class="text-xs text-gray-500 mt-2">Logo akan ditempatkan di tengah QR dengan margin yang aman</p>
                             </div>
                         </div>
-                        END LOGO COMMENT -->
+                        -->
                                 </div>
                             </div>
 
